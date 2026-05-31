@@ -3,33 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSE ECON Quantum Market Simulator</title>
+    <title>DSE ECON Market Simulator (Aesthetic Edition)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #05070f;
-            --panel-bg: rgba(10, 14, 26, 0.75);
-            --border-color: rgba(255, 255, 255, 0.06);
-            --text-main: #f1f3f9;
-            --text-muted: #6b7c96;
+            /* Pinterest-Inspired Aesthetic Dark Palette */
+            --bg-color: #0d0f14;
+            --panel-bg: rgba(18, 22, 32, 0.7);
+            --border-color: rgba(255, 255, 255, 0.05);
             
-            /* High-end Cyber Neon Palette */
-            --neon-cyan: #00f0ff;
-            --neon-magenta: #ff2a85;
-            --neon-purple: #9d00ff;
+            /* Clean Typography Tones */
+            --text-main: #e2e8f0;
+            --text-muted: #718096;
             
-            /* Refined Semi-transparent Area Shading */
-            --area-consumer: rgba(255, 42, 133, 0.28); /* Aurora Pink Burst */
-            --area-producer: rgba(0, 240, 255, 0.25); /* Deep Cyber Cyan */
-            --area-sub-consumer: rgba(0, 255, 157, 0.25); /* Mint Neon */
-            --area-sub-producer: rgba(255, 196, 0, 0.25); /* Amber Neon */
-            --area-tr: rgba(157, 0, 255, 0.04); /* Low-key Plasma Velvet */
+            /* Morandi Neon Lines */
+            --color-demand: #4fd1c5;       /* Soft Mist Cyan */
+            --color-supply: #f687b3;       /* Dusty Rose/Magenta */
+            --color-new-supply: #b794f4;   /* Muted Lavender */
+            
+            /* High-End Soft Shading (Pinterest Palette) */
+            --area-tax-consumer: rgba(251, 211, 141, 0.16); /* Creamy Oat */
+            --area-tax-producer: rgba(183, 148, 244, 0.18); /* Smoky Amethyst */
+            --area-sub-consumer: rgba(129, 230, 217, 0.16); /* Sage Green Tint */
+            --area-sub-producer: rgba(246, 173, 85, 0.16);  /* Muted Ginger Amber */
+            --area-tr: rgba(255, 255, 255, 0.02);           /* Micro-opacity Ghost White */
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
-            padding: 40px 20px;
+            padding: 50px 20px;
             background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
@@ -37,41 +40,39 @@
 
         h1 {
             text-align: center;
-            font-weight: 800;
-            font-size: 26px;
-            letter-spacing: 3px;
-            background: linear-gradient(90deg, var(--neon-cyan) 0%, var(--neon-magenta) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 40px;
-            text-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: 2px;
+            color: #ffffff;
+            margin-bottom: 45px;
+            opacity: 0.95;
         }
 
         .container {
             display: flex;
             flex-wrap: wrap;
-            gap: 30px;
+            gap: 35px;
             justify-content: center;
             max-width: 1250px;
             margin: 0 auto;
         }
 
-        /* Pure Dark Cyber Glassmorphism */
+        /* Clean Glassmorphism Panels */
         .control-panel, .chart-panel {
             background: var(--panel-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--border-color);
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 30px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
         }
 
         .control-panel {
             width: 380px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 26px;
             box-sizing: border-box;
         }
 
@@ -85,12 +86,12 @@
 
         h3 {
             margin-top: 0;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
             color: var(--text-muted);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding-bottom: 14px;
             text-transform: uppercase;
         }
 
@@ -101,59 +102,58 @@
         label {
             display: block;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 500;
             margin-bottom: 10px;
             color: var(--text-muted);
-            letter-spacing: 0.5px;
         }
 
-        /* Clean Minimalist Custom Sliders */
+        /* Minimalist Sleek Range Sliders */
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
-            background: rgba(255, 255, 255, 0.04);
-            height: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            height: 3px;
             border-radius: 2px;
             outline: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #ffffff;
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.15s ease, background-color 0.15s ease;
         }
 
-        #ed::-webkit-slider-thumb { background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
-        #es::-webkit-slider-thumb { background: var(--neon-magenta); box-shadow: 0 0 10px var(--neon-magenta); }
-        #tax::-webkit-slider-thumb { background: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); }
-        #sub::-webkit-slider-thumb { background: #00ff9d; box-shadow: 0 0 10px #00ff9d; }
+        #ed::-webkit-slider-thumb { background: var(--color-demand); }
+        #es::-webkit-slider-thumb { background: var(--color-supply); }
+        #tax::-webkit-slider-thumb { background: var(--color-new-supply); }
+        #sub::-webkit-slider-thumb { background: #cbd5e0; }
 
         input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.3);
+            transform: scale(1.4);
         }
 
         .value-display {
             float: right;
-            font-weight: 700;
+            font-weight: 600;
             font-family: monospace;
-            font-size: 13px;
+            font-size: 12px;
         }
 
-        /* HUD Matrix Look */
+        /* Clean Structured Info Matrix */
         .results {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            padding: 20px;
-            border-radius: 8px;
-            font-family: monospace;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            padding: 22px;
+            border-radius: 10px;
+            font-family: -apple-system, sans-serif;
         }
 
         .results p {
-            margin: 12px 0;
+            margin: 14px 0;
             font-size: 13px;
             display: flex;
             justify-content: space-between;
@@ -162,76 +162,76 @@
 
         .results span {
             color: var(--text-main);
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .toggle-container {
             padding: 14px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.03);
             border-radius: 8px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--text-main);
             cursor: pointer;
-            letter-spacing: 0.5px;
-            transition: background 0.2s;
+            transition: background 0.2s, border 0.2s;
         }
 
         .toggle-container:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.06);
         }
 
         .toggle-container input {
             cursor: pointer;
-            accent-color: var(--neon-cyan);
+            accent-color: var(--color-demand);
         }
 
         hr {
             border: 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            margin: 14px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            margin: 16px 0;
         }
 
         .area-legend {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-top: 14px;
+            gap: 10px;
+            margin-top: 16px;
             font-size: 11px;
         }
-        .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
-        .box { width: 8px; height: 8px; border-radius: 50%; }
+        .legend-item { display: flex; align-items: center; gap: 10px; color: var(--text-muted); }
+        .box { width: 6px; height: 6px; border-radius: 50%; }
     </style>
 </head>
 <body>
 
-    <h1>📊 MARKET ANALYSIS SIMULATOR</h1>
+    <h1>📊 MARKET SIMULATION INTERACTIVE</h1>
     
     <div class="container">
         <div class="control-panel">
             <h3>System Controls</h3>
             
             <div class="control-group">
-                <label>Elasticity of Demand (Ed) <span class="value-display" id="ed-val" style="color: var(--neon-cyan);">1.0</span></label>
+                <label>Elasticity of Demand (Ed) <span class="value-display" id="ed-val" style="color: var(--color-demand);">1.0</span></label>
                 <input type="range" id="ed" min="0" max="2.5" step="0.1" value="1.0">
             </div>
             
             <div class="control-group">
-                <label>Elasticity of Supply (Es) <span class="value-display" id="es-val" style="color: var(--neon-magenta);">1.0</span></label>
+                <label>Elasticity of Supply (Es) <span class="value-display" id="es-val" style="color: var(--color-supply);">1.0</span></label>
                 <input type="range" id="es" min="0" max="2.5" step="0.1" value="1.0">
             </div>
 
             <div class="control-group">
-                <label>Per-unit Tax <span class="value-display" id="tax-val" style="color: var(--neon-purple);">0</span></label>
+                <label>Per-unit Tax <span class="value-display" id="tax-val" style="color: var(--color-new-supply);">0</span></label>
                 <input type="range" id="tax" min="0" max="30" step="1" value="0">
             </div>
 
             <div class="control-group">
-                <label>Per-unit Subsidy <span class="value-display" id="sub-val" style="color: #00ff9d;">0</span></label>
+                <label>Per-unit Subsidy <span class="value-display" id="sub-val" style="color: #a0aec0;">0</span></label>
                 <input type="range" id="sub" min="0" max="30" step="1" value="0">
             </div>
 
@@ -241,27 +241,27 @@
             </div>
 
             <div class="results">
-                <h3 style="font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; color: #ffffff;">Analytics Matrix</h3>
+                <h3 style="font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); margin-bottom: 12px; color: #ffffff; text-transform: none; font-weight: 500;">Data Matrix</h3>
                 <p>Market Price (P*): <span id="res-p">-</span></p>
                 <p>Equilibrium Qty (Q*): <span id="res-q">-</span></p>
-                <p>Total Revenue (TR): <span id="res-tr" style="color: var(--neon-cyan);">-</span></p>
+                <p>Total Revenue (TR): <span id="res-tr" style="color: var(--color-demand); font-weight: 600;">-</span></p>
                 <p>Net Revenue (Sellers): <span id="res-net-tr">-</span></p>
                 
                 <hr>
-                <p>Consumer Burden: <span id="res-cb" style="color: var(--neon-magenta);">0</span></p>
-                <p>Producer Burden: <span id="res-pb" style="color: var(--neon-cyan);">0</span></p>
-                <p>Total Tax Revenue: <span id="res-total-tax" style="color: var(--neon-purple);">0</span></p>
+                <p>Consumer Burden: <span id="res-cb" style="color: #fbd38d;">0</span></p>
+                <p>Producer Burden: <span id="res-pb" style="color: #b794f4;">0</span></p>
+                <p>Total Tax Revenue: <span id="res-total-tax">-</span></p>
                 
                 <hr>
-                <p>Consumer Subsidy Share: <span id="res-cs-sub" style="color: #00ff9d;">0</span></p>
-                <p>Producer Subsidy Share: <span id="res-ps-sub" style="color: #ffc400;">0</span></p>
-                <p>Total Gov Expenditure: <span id="res-total-sub" style="color: #ffffff;">0</span></p>
+                <p>Consumer Subsidy Share: <span id="res-cs-sub" style="color: #81e6d9;">0</span></p>
+                <p>Producer Subsidy Share: <span id="res-ps-sub" style="color: #f6ad55;">0</span></p>
+                <p>Total Gov Expenditure: <span id="res-total-sub">0</span></p>
                 
                 <hr>
                 <div class="area-legend">
-                    <div class="legend-item"><div class="box" style="background: var(--neon-magenta);"></div> Consumer Component (Pink Shading)</div>
-                    <div class="legend-item"><div class="box" style="background: var(--neon-cyan);"></div> Producer Component (Cyan Shading)</div>
-                    <div class="legend-item"><div class="box" style="background: var(--area-tr); border: 1px dashed var(--neon-purple);"></div> Total Revenue Area Boundary</div>
+                    <div class="legend-item"><div class="box" style="background: #fbd38d;"></div> Consumer Component</div>
+                    <div class="legend-item"><div class="box" style="background: #b794f4;"></div> Producer Component</div>
+                    <div class="legend-item"><div class="box" style="background: transparent; border: 1px dashed rgba(255,255,255,0.2);"></div> Total Revenue Grid Area</div>
                 </div>
             </div>
         </div>
@@ -296,67 +296,65 @@
 
                 ctx.save();
 
-                // 1. Draw TOTAL REVENUE Base (Velvet Plasma tint)
+                // 1. Draw TOTAL REVENUE Base (Ghost White minimal tint)
                 if (econData.showTR && econData.newQ > 0) {
-                    ctx.fillStyle = 'rgba(157, 0, 255, 0.03)';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.015)';
                     ctx.fillRect(xZero, yP_buyer, xQ - xZero, yZero - yP_buyer);
                     
-                    ctx.strokeStyle = 'rgba(157, 0, 255, 0.25)';
-                    ctx.lineWidth = 1.2;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                    ctx.lineWidth = 1.0;
                     ctx.setLineDash([4, 4]);
                     ctx.strokeRect(xZero, yP_buyer, xQ - xZero, yZero - yP_buyer);
                 }
 
-                // 2. High-End Overlays (Tax & Subsidy)
+                // 2. Pinterest Morandi Area Overlays
                 if (econData.tax > 0 && econData.newQ > 0) {
-                    ctx.fillStyle = 'rgba(255, 42, 133, 0.22)'; // Elegant Pink Shading
+                    ctx.fillStyle = 'rgba(251, 211, 141, 0.15)'; // Creamy Oat
                     ctx.fillRect(xZero, Math.min(yP_base, yP_buyer), xQ - xZero, Math.abs(yP_buyer - yP_base));
 
-                    ctx.fillStyle = 'rgba(0, 240, 255, 0.18)'; // Elegant Cyan Shading
+                    ctx.fillStyle = 'rgba(183, 148, 244, 0.14)'; // Smoky Amethyst
                     ctx.fillRect(xZero, Math.min(yP_base, yP_seller), xQ - xZero, Math.abs(yP_base - yP_seller));
                 }
                 
                 if (econData.sub > 0 && econData.newQ > 0) {
-                    ctx.fillStyle = 'rgba(0, 255, 157, 0.18)'; // Elegant Neon Mint
+                    ctx.fillStyle = 'rgba(129, 230, 217, 0.14)'; // Sage Green
                     ctx.fillRect(xZero, Math.min(yP_base, yP_buyer), xQ - xZero, Math.abs(yP_base - yP_buyer));
 
-                    ctx.fillStyle = 'rgba(255, 196, 0, 0.18)'; // Elegant Neon Amber
+                    ctx.fillStyle = 'rgba(246, 173, 85, 0.14)'; // Muted Ginger
                     ctx.fillRect(xZero, Math.min(yP_seller, yP_base), xQ - xZero, Math.abs(yP_seller - yP_base));
                 }
 
-                // 3. Drop Lines & Axis Tags
+                // 3. Elegant Drop Lines & Axis Tags
                 if (econData.newQ > 0) {
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-                    ctx.lineWidth = 1.2;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                    ctx.lineWidth = 1.0;
                     ctx.setLineDash([4, 4]);
 
                     ctx.beginPath(); ctx.moveTo(xQ, yP_buyer); ctx.lineTo(xZero, yP_buyer); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(xQ, yP_buyer); ctx.lineTo(xQ, yZero); ctx.stroke();
 
-                    ctx.font = 'bold 12px monospace';
-                    ctx.fillStyle = '#ffffff';
-                    ctx.shadowBlur = 8; ctx.shadowColor = 'var(--neon-cyan)';
+                    ctx.font = '500 11px -apple-system, sans-serif';
+                    ctx.fillStyle = '#a0aec0';
                     
                     ctx.fillText('P*', xZero + 10, yP_buyer - 6);
                     ctx.fillText('Q*', xQ + 6, yZero - 10);
-                    ctx.shadowBlur = 0;
                 }
 
                 ctx.restore();
             }
         };
 
-        // Initialize Deep Dark Theme Chart
+        // Initialize Deep Clean Aesthetic Chart
         const ctx = document.getElementById('marketChart').getContext('2d');
         let marketChart = new Chart(ctx, {
             type: 'line',
             plugins: [econVisualPlugin],
             data: {
                 datasets: [
-                    { label: 'Demand (D)', data: [], borderColor: '#00f0ff', borderWidth: 2.5, fill: false, pointRadius: 0 },
-                    { label: 'Supply (S)', data: [], borderColor: '#ff2a85', borderWidth: 2.5, fill: false, pointRadius: 0 },
-                    { label: 'New Supply (S\')', data: [], borderColor: '#9d00ff', borderWidth: 1.8, borderDash: [5, 4], fill: false, pointRadius: 0 },
-                    { label: 'Equilibrium Point', data: [], backgroundColor: '#ffffff', pointRadius: 5, type: 'scatter' }
+                    { label: 'Demand (D)', data: [], borderColor: '#4fd1c5', borderWidth: 2, fill: false, pointRadius: 0 },
+                    { label: 'Supply (S)', data: [], borderColor: '#f687b3', borderWidth: 2, fill: false, pointRadius: 0 },
+                    { label: 'New Supply (S\')', data: [], borderColor: '#b794f4', borderWidth: 1.5, borderDash: [4, 4], fill: false, pointRadius: 0 },
+                    { label: 'Equilibrium', data: [], backgroundColor: '#ffffff', pointRadius: 4, type: 'scatter' }
                 ]
             },
             options: {
@@ -366,25 +364,25 @@
                 scales: {
                     x: { 
                         type: 'linear', 
-                        title: { display: true, text: 'Quantity (Q)', color: '#6b7c96', font: { size: 12, weight: 'bold' } }, 
+                        title: { display: true, text: 'Quantity (Q)', color: '#4a5568', font: { size: 11, weight: '500' } }, 
                         min: 0, max: 100,
-                        grid: { color: 'rgba(255, 255, 255, 0.03)' },
-                        ticks: { color: '#4e5d73', font: { family: 'monospace' } }
+                        grid: { color: 'rgba(255, 255, 255, 0.02)' },
+                        ticks: { color: '#4a5568', font: { size: 10 } }
                     },
                     y: { 
                         type: 'linear', 
-                        title: { display: true, text: 'Price (P)', color: '#6b7c96', font: { size: 12, weight: 'bold' } }, 
+                        title: { display: true, text: 'Price (P)', color: '#4a5568', font: { size: 11, weight: '500' } }, 
                         min: 0, max: 100,
-                        grid: { color: 'rgba(255, 255, 255, 0.03)' },
-                        ticks: { color: '#4e5d73', font: { family: 'monospace' } }
+                        grid: { color: 'rgba(255, 255, 255, 0.02)' },
+                        ticks: { color: '#4a5568', font: { size: 10 } }
                     }
                 },
                 plugins: {
                     legend: { 
                         labels: { 
-                            color: '#a4b3c6',
-                            font: { size: 11, weight: '600' },
-                            boxWidth: 15
+                            color: '#718096',
+                            font: { size: 11, weight: '500' },
+                            boxWidth: 12
                         } 
                     }
                 }
