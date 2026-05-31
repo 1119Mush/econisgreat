@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSE ECON Market Simulator (Dual-Shading & Clear Labels)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f7;
+            color: #333;
+        }
+        h1 { text-align: center; color: #1d1d1f; margin-bottom: 30px; }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            width: 380px;
+        }
+        .chart-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            flex: 1;
+            min-width: 350px;
+            max-width: 700px;
+            height: 550px;
+        }
+        .control-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin-top: 5px;
+        }
+        .value-display {
+            float: right;
+            color: #0071e3;
+            font-weight: bold;
+        }
+        .results {
+            background: #f5f5f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .results h3 { margin-top: 0; color: #1d1d1f; font-size: 16px; border-bottom: 1px solid #d2d2d7; padding-bottom: 5px;}
+        .results p { margin: 8px 0; font-size: 14px; display: flex; justify-content: space-between; }
+        .results span { font-weight: 600; }
+        .tax-text { color: #e30000; }
+        .sub-text { color: #008a00; }
+        hr { border: 0; border-top: 1px dashed #d2d2d7; margin: 10px 0; }
+        
+        .area-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 11px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .box { width: 12px; height: 12px; border-radius: 3px; }
+        
+        .toggle-container {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f4ff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #0071e3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📊 DSE ECON Market Simulator (Drop-Lines & Combined Areas)</h1>
+    
+    <div class="container">
+        <div class="control-panel">
+            <h3 style="margin-top:0;">🎛️ Adjust Parameters</h3>
+            
+            <div class="control-group">
+                <label>Price Elasticity of Demand (Ed) <span class="value-display" id="ed-val">1.0</span></label>
+                <input type="range" id="ed" min="0" max="2.5" step="0.1" value="1.0">
+            </div>
+            
+            <div class="control-group">
+                <label>Price Elasticity of Supply (Es) <span class="value-display" id="es-val">1.0</span></label>
+                <input type="range" id="es" min="0" max="2.5" step="0.1" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label class="tax-text">Per-unit Tax <span class="value-display tax-text" id="tax-val">0</span></label>
+                <input type="range" id="tax" min="0" max="30" step="1" value="0">
+            </div>
+
+            <div class="control-group">
+                <label class="sub-text">Per-unit Subsidy <span class="value-display sub-text" id="sub-val">0</span></label>
+                <input type="range" id="sub" min="0" max="30" step="1" value="0">
+            </div>
+
+            <div class="toggle-container">
+                <input type="checkbox" id="showTR" checked>
+                <label for="showTR" style="margin: 0; cursor: pointer;">🔍 Overlay Total Revenue (TR) Area</label>
+            </div>
+
+            <div class="results">
+                <h3>📈 Data Analysis (DSE Hotspots)</h3>
+                <p>Market Price (P*): <span id="res-p">-</span></p>
+                <p>Equilibrium Quantity (Q*): <span id="res-q">-</span></p>
+                <p style="color: #0071e3;">Total Revenue (TR): <span id="res-tr">-</span></p>
+                <p>Net of Tax Revenue: <span id="res-net-tr">-</span></p>
+                
+                <hr>
+                <p class="tax-text">Consumer Tax Burden: <span id="res-cb">0</span></p>
+                <p class="tax-text">Producer Tax Burden: <span id="res-pb">0</span></p>
+                <p class="tax-text">Total Tax Revenue: <span id="res-total-tax">0</span></p>
+                
+                <hr>
+                <p class="sub-text">Consumer Subsidy Share (CS): <span id="res-cs-sub">0</span></p>
+                <p class="sub-text">Producer Subsidy Share (PS): <span id="res-ps-sub">0</span></p>
+                <p class="sub-text">Total Subsidy Expenditure: <span id="res-total-sub">0</span></p>
+                
+                <hr>
+                <div class="area-legend">
+                    <div class="legend-item"><div class="box" style="background: rgba(255, 69, 58, 0.45);"></div> Consumer Burden</div>
+                    <div class="legend-item"><div class="box" style="background: rgba(0, 113, 227, 0.45);"></div> Producer Burden</div>
+                    <div class="legend-item"><div class="box" style="background: rgba(52, 199, 89, 0.45);"></div> Consumer Subsidy</div>
+                    <div class="legend-item"><div class="box" style="background: rgba(255, 214, 10, 0.45);"></div> Producer Subsidy</div>
+                    <div class="legend-item"><div class="box" style="background: rgba(0, 113, 227, 0.08); border: 1.5px dashed #0071e3;"></div> TR Area (Blue Tint)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-panel">
+            <canvas id="marketChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const edSlider = document.getElementById('ed');
+        const esSlider = document.getElementById('es');
+        const taxSlider = document.getElementById('tax');
+        const subSlider = document.getElementById('sub');
+        const trCheckbox = document.getElementById('showTR');
+
+        let econData = {
+            tax: 0, sub: 0, P_base: 50, Q_base: 50, newQ: 50, newP_buyer: 50, newP_seller: 50, showTR: true
+        };
+
+        // Custom Engine for Simultaneous Layering & Non-overlapping text labels
+        const econVisualPlugin = {
+            id: 'econVisualPlugin',
+            beforeDatasetsDraw(chart) {
+                const { ctx, scales: { x, y } } = chart;
+                
+                const xZero = x.getPixelForValue(0);
+                const xQ = x.getPixelForValue(econData.newQ);
+                const yZero = y.getPixelForValue(0);
+                const yP_base = y.getPixelForValue(econData.P_base);
+                const yP_buyer = y.getPixelForValue(econData.newP_buyer);
+                const yP_seller = y.getPixelForValue(econData.newP_seller);
+
+                ctx.save();
+
+                // LAYER 1: Draw TOTAL REVENUE Area underneath (Light blue tint)
+                if (econData.showTR && econData.newQ > 0) {
+                    ctx.fillStyle = 'rgba(0, 113, 227, 0.08)';
+                    ctx.fillRect(xZero, yP_buyer, xQ - xZero, yZero - yP_buyer);
+                    
+                    // Soft TR border outline
+                    ctx.strokeStyle = 'rgba(0, 113, 227, 0.4)';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([3, 3]);
+                    ctx.strokeRect(xZero, yP_buyer, xQ - xZero, yZero - yP_buyer);
+                }
+
+                // LAYER 2: Overlay TAX / SUBSIDY Areas simultaneously 
+                if (econData.tax > 0 && econData.newQ > 0) {
+                    // Consumer Tax Burden (Red Rectangle)
+                    ctx.fillStyle = 'rgba(255, 69, 58, 0.45)';
+                    ctx.fillRect(xZero, Math.min(yP_base, yP_buyer), xQ - xZero, Math.abs(yP_buyer - yP_base));
+
+                    // Producer Tax Burden (Blue Rectangle)
+                    ctx.fillStyle = 'rgba(0, 113, 227, 0.45)';
+                    ctx.fillRect(xZero, Math.min(yP_base, yP_seller), xQ - xZero, Math.abs(yP_base - yP_seller));
+                }
+                
+                if (econData.sub > 0 && econData.newQ > 0) {
+                    // Consumer Subsidy Share (Green Rectangle)
+                    ctx.fillStyle = 'rgba(52, 199, 89, 0.45)';
+                    ctx.fillRect(xZero, Math.min(yP_base, yP_buyer), xQ - xZero, Math.abs(yP_base - yP_buyer));
+
+                    // Producer Subsidy Share (Yellow Rectangle)
+                    ctx.fillStyle = 'rgba(255, 214, 10, 0.45)';
+                    ctx.fillRect(xZero, Math.min(yP_seller, yP_base), xQ - xZero, Math.abs(yP_seller - yP_base));
+                }
+
+                // LAYER 3: DSE Drop Axis Lines (輔助線)
+                if (econData.newQ > 0) {
+                    ctx.strokeStyle = '#444444';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([5, 5]);
+
+                    // P* Line to Axis
+                    ctx.beginPath(); ctx.moveTo(xQ, yP_buyer); ctx.lineTo(xZero, yP_buyer); ctx.stroke();
+
+                    // Q* Line to Axis
+                    ctx.beginPath(); ctx.moveTo(xQ, yP_buyer); ctx.lineTo(xQ, yZero); ctx.stroke();
+
+                    // --- ANTI-OVERLAP TEXT MARKERS (將文字移開軸線並附加背景底框) ---
+                    ctx.font = 'bold 12px -apple-system, sans-serif';
+                    
+                    // Draw P* Tag offset to the right of Y-axis
+                    ctx.fillStyle = '#1d1d1f';
+                    ctx.shadowBlur = 4; ctx.shadowColor = 'white'; // Text glow halo effect
+                    ctx.fillText('P*', xZero + 8, yP_buyer - 6);
+
+                    // Draw Q* Tag offset above the X-axis
+                    ctx.fillText('Q*', xQ + 6, yZero - 8);
+                    
+                    // Clear shadow for rest of the canvas
+                    ctx.shadowBlur = 0;
+                }
+
+                ctx.restore();
+            }
+        };
+
+        // Initialize Chart
+        const ctx = document.getElementById('marketChart').getContext('2d');
+        let marketChart = new Chart(ctx, {
+            type: 'line',
+            plugins: [econVisualPlugin],
+            data: {
+                datasets: [
+                    { label: 'Demand (D)', data: [], borderColor: '#0071e3', borderWidth: 3, fill: false, pointRadius: 0 },
+                    { label: 'Supply (S)', data: [], borderColor: '#ff453a', borderWidth: 3, fill: false, pointRadius: 0 },
+                    { label: 'New Supply (S\')', data: [], borderColor: '#af52de', borderWidth: 2, borderDash: [6, 6], fill: false, pointRadius: 0 },
+                    { label: 'Equilibrium Point', data: [], backgroundColor: '#1d1d1f', pointRadius: 6, type: 'scatter' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 100 },
+                scales: {
+                    x: { type: 'linear', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 100 },
+                    y: { type: 'linear', title: { display: true, text: 'Price (P)' }, min: 0, max: 100 }
+                }
+            }
+        });
+
+        function updateMarket() {
+            let ed = parseFloat(edSlider.value);
+            let es = parseFloat(esSlider.value);
+            let tax = parseFloat(taxSlider.value);
+            let sub = parseFloat(subSlider.value);
+            let showTR = trCheckbox.checked;
+
+            if (this === taxSlider && tax > 0) { subSlider.value = 0; sub = 0; }
+            if (this === subSlider && sub > 0) { taxSlider.value = 0; tax = 0; }
+
+            document.getElementById('ed-val').innerText = ed === 0 ? "0 (Perfectly Inelastic)" : ed.toFixed(1);
+            document.getElementById('es-val').innerText = es === 0 ? "0 (Perfectly Inelastic)" : es.toFixed(1);
+            document.getElementById('tax-val').innerText = tax;
+            document.getElementById('sub-val').innerText = sub;
+
+            const P_base = 50;
+            const Q_base = 50;
+            const shift = tax - sub;
+
+            let newQ = 50;
+            let newP_buyer = 50;
+
+            if (ed === 0 && es === 0) {
+                newQ = Q_base; newP_buyer = P_base + shift;
+            } else if (ed === 0) {
+                newQ = Q_base; const d = 1 / es; const c = P_base - d * Q_base;
+                newP_buyer = (c + shift) + d * newQ;
+            } else if (es === 0) {
+                newQ = Q_base; const b = 1 / ed; const a = P_base + b * Q_base;
+                newP_buyer = a - b * newQ;
+            } else {
+                const b = 1 / ed; const d = 1 / es;
+                const a = P_base + b * Q_base; const c = P_base - d * Q_base;
+                newQ = (a - c - shift) / (b + d);
+                if (newQ < 0) newQ = 0;
+                newP_buyer = a - b * newQ;
+            }
+
+            if (newP_buyer < 0) newP_buyer = 0;
+            let newP_seller = newP_buyer - shift;
+
+            econData = { tax, sub, P_base, Q_base, newQ, newP_buyer, newP_seller, showTR };
+
+            const TR = newP_buyer * newQ; 
+            const netTR = newP_seller * newQ; 
+            const totalTax = tax * newQ;
+            const totalSub = sub * newQ;
+
+            let consumerBurden = 0, producerBurden = 0;
+            let csSub = 0, psSub = 0;
+
+            if (tax > 0 && newQ > 0) {
+                consumerBurden = Math.max(0, (newP_buyer - P_base) * newQ);
+                producerBurden = Math.max(0, (P_base - newP_seller) * newQ);
+            } else if (sub > 0 && newQ > 0) {
+                csSub = Math.max(0, (P_base - newP_buyer) * newQ);
+                psSub = Math.max(0, (newP_seller - P_base) * newQ);
+            }
+
+            document.getElementById('res-p').innerText = '$' + newP_buyer.toFixed(1);
+            document.getElementById('res-q').innerText = newQ.toFixed(1);
+            document.getElementById('res-tr').innerText = '$' + TR.toFixed(0);
+            document.getElementById('res-net-tr').innerText = '$' + netTR.toFixed(0);
+            document.getElementById('res-cb').innerText = '$' + consumerBurden.toFixed(0);
+            document.getElementById('res-pb').innerText = '$' + producerBurden.toFixed(0);
+            document.getElementById('res-total-tax').innerText = '$' + totalTax.toFixed(0);
+            document.getElementById('res-cs-sub').innerText = '$' + csSub.toFixed(0);
+            document.getElementById('res-ps-sub').innerText = '$' + psSub.toFixed(0);
+            document.getElementById('res-total-sub').innerText = '$' + totalSub.toFixed(0);
+
+            let dData = [], sData = [], sNewData = [];
+            for (let q = 0; q <= 100; q += 10) {
+                if (ed === 0) { dData = [{ x: 50, y: 0 }, { x: 50, y: 100 }]; } 
+                else { const b = 1 / ed; const a = P_base + b * Q_base; dData.push({ x: q, y: Math.max(0, a - b * q) }); }
+
+                if (es === 0) { sData = [{ x: 50, y: 0 }, { x: 50, y: 100 }]; sNewData = [{ x: 50, y: 0 }, { x: 50, y: 100 }]; } 
+                else { 
+                    const d = 1 / es; const c = P_base - d * Q_base; 
+                    sData.push({ x: q, y: Math.max(0, c + d * q) });
+                    sNewData.push({ x: q, y: Math.max(0, (c + shift) + d * q) });
+                }
+            }
+
+            marketChart.data.datasets[0].data = dData;
+            marketChart.data.datasets[1].data = sData;
+            marketChart.data.datasets[2].data = (tax > 0 || sub > 0) ? sNewData : [];
+            marketChart.data.datasets[3].data = [{ x: newQ, y: newP_buyer }];
+            
+            marketChart.update();
+        }
+
+        [edSlider, esSlider, taxSlider, subSlider].forEach(el => el.addEventListener('input', updateMarket));
+        trCheckbox.addEventListener('change', updateMarket);
+
+        updateMarket();
+    </script>
+</body>
+</html>
