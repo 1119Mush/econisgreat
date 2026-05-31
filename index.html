@@ -7,22 +7,29 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #0a0f1d;
-            --panel-bg: rgba(20, 30, 55, 0.6);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text-main: #f5f7fa;
-            --text-muted: #8a99ad;
-            --theme-blue: #00f0ff;
-            --theme-red: #ff3860;
-            --theme-green: #00ff66;
-            --theme-purple: #bd00ff;
-            --theme-yellow: #ffdd57;
+            --bg-color: #05070f;
+            --panel-bg: rgba(10, 14, 26, 0.75);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --text-main: #f1f3f9;
+            --text-muted: #6b7c96;
+            
+            /* High-end Cyber Neon Palette */
+            --neon-cyan: #00f0ff;
+            --neon-magenta: #ff2a85;
+            --neon-purple: #9d00ff;
+            
+            /* Refined Semi-transparent Area Shading */
+            --area-consumer: rgba(255, 42, 133, 0.28); /* Aurora Pink Burst */
+            --area-producer: rgba(0, 240, 255, 0.25); /* Deep Cyber Cyan */
+            --area-sub-consumer: rgba(0, 255, 157, 0.25); /* Mint Neon */
+            --area-sub-producer: rgba(255, 196, 0, 0.25); /* Amber Neon */
+            --area-tr: rgba(157, 0, 255, 0.04); /* Low-key Plasma Velvet */
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
-            padding: 30px;
+            padding: 40px 20px;
             background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
@@ -31,56 +38,60 @@
         h1 {
             text-align: center;
             font-weight: 800;
-            letter-spacing: 2px;
-            background: linear-gradient(135deg, #00f0ff 0%, #bd00ff 100%);
+            font-size: 26px;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan) 0%, var(--neon-magenta) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 35px;
-            text-shadow: 0 0 30px rgba(189, 0, 255, 0.2);
+            margin-bottom: 40px;
+            text-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
         }
 
         .container {
             display: flex;
             flex-wrap: wrap;
-            gap: 25px;
+            gap: 30px;
             justify-content: center;
-            max-width: 1300px;
+            max-width: 1250px;
             margin: 0 auto;
         }
 
-        /* Sci-fi Glassmorphism Panels */
+        /* Pure Dark Cyber Glassmorphism */
         .control-panel, .chart-panel {
             background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border-radius: 14px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
         .control-panel {
-            width: 400px;
+            width: 380px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
+            box-sizing: border-box;
         }
 
         .chart-panel {
             flex: 1;
             min-width: 400px;
-            max-width: 750px;
-            height: 580px;
+            max-width: 720px;
+            height: 600px;
             position: relative;
         }
 
         h3 {
             margin-top: 0;
-            font-size: 18px;
-            letter-spacing: 1px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 12px;
+            text-transform: uppercase;
         }
 
         .control-group {
@@ -89,163 +100,168 @@
 
         label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: var(--text-muted);
+            letter-spacing: 0.5px;
         }
 
-        /* Futuristic Range Sliders */
+        /* Clean Minimalist Custom Sliders */
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            height: 6px;
-            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.04);
+            height: 4px;
+            border-radius: 2px;
             outline: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: var(--text-main);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            background: #ffffff;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
+
+        #ed::-webkit-slider-thumb { background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
+        #es::-webkit-slider-thumb { background: var(--neon-magenta); box-shadow: 0 0 10px var(--neon-magenta); }
+        #tax::-webkit-slider-thumb { background: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); }
+        #sub::-webkit-slider-thumb { background: #00ff9d; box-shadow: 0 0 10px #00ff9d; }
 
         input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
+            transform: scale(1.3);
         }
-
-        #ed::-webkit-slider-thumb { background: var(--theme-blue); box-shadow: 0 0 10px var(--theme-blue); }
-        #es::-webkit-slider-thumb { background: var(--theme-red); box-shadow: 0 0 10px var(--theme-red); }
-        #tax::-webkit-slider-thumb { background: var(--theme-purple); box-shadow: 0 0 10px var(--theme-purple); }
-        #sub::-webkit-slider-thumb { background: var(--theme-green); box-shadow: 0 0 10px var(--theme-green); }
 
         .value-display {
             float: right;
             font-weight: 700;
             font-family: monospace;
+            font-size: 13px;
         }
 
-        /* Cyberpunk HUD Results Box */
+        /* HUD Matrix Look */
         .results {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 18px;
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 8px;
             font-family: monospace;
         }
 
         .results p {
-            margin: 10px 0;
+            margin: 12px 0;
             font-size: 13px;
             display: flex;
             justify-content: space-between;
+            color: var(--text-muted);
         }
 
         .results span {
             color: var(--text-main);
-            font-weight: bold;
+            font-weight: 600;
         }
 
         .toggle-container {
-            padding: 12px;
-            background: rgba(0, 240, 255, 0.05);
-            border: 1px solid rgba(0, 240, 255, 0.15);
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 13px;
-            font-weight: bold;
-            color: var(--theme-blue);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
             cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: background 0.2s;
+        }
+
+        .toggle-container:hover {
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .toggle-container input {
             cursor: pointer;
-            accent-color: var(--theme-blue);
+            accent-color: var(--neon-cyan);
         }
 
         hr {
             border: 0;
-            border-top: 1px dashed rgba(255, 255, 255, 0.1);
-            margin: 12px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 14px 0;
         }
 
         .area-legend {
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 12px;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 14px;
             font-size: 11px;
-            color: var(--text-muted);
         }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .box { width: 10px; height: 10px; border-radius: 2px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+        .box { width: 8px; height: 8px; border-radius: 50%; }
     </style>
 </head>
 <body>
 
-    <h1>📊 QUANTUM ECON MARKET SIMULATOR</h1>
+    <h1>📊 MARKET ANALYSIS SIMULATOR</h1>
     
     <div class="container">
         <div class="control-panel">
-            <h3>🎛️ SYSTEM PARAMETERS</h3>
+            <h3>System Controls</h3>
             
             <div class="control-group">
-                <label>Elasticity of Demand (Ed) <span class="value-display" id="ed-val" style="color: var(--theme-blue);">1.0</span></label>
+                <label>Elasticity of Demand (Ed) <span class="value-display" id="ed-val" style="color: var(--neon-cyan);">1.0</span></label>
                 <input type="range" id="ed" min="0" max="2.5" step="0.1" value="1.0">
             </div>
             
             <div class="control-group">
-                <label>Elasticity of Supply (Es) <span class="value-display" id="es-val" style="color: var(--theme-red);">1.0</span></label>
+                <label>Elasticity of Supply (Es) <span class="value-display" id="es-val" style="color: var(--neon-magenta);">1.0</span></label>
                 <input type="range" id="es" min="0" max="2.5" step="0.1" value="1.0">
             </div>
 
             <div class="control-group">
-                <label style="color: var(--theme-purple);">Per-unit Tax <span class="value-display" id="tax-val" style="color: var(--theme-purple);">0</span></label>
+                <label>Per-unit Tax <span class="value-display" id="tax-val" style="color: var(--neon-purple);">0</span></label>
                 <input type="range" id="tax" min="0" max="30" step="1" value="0">
             </div>
 
             <div class="control-group">
-                <label style="color: var(--theme-green);">Per-unit Subsidy <span class="value-display" id="sub-val" style="color: var(--theme-green);">0</span></label>
+                <label>Per-unit Subsidy <span class="value-display" id="sub-val" style="color: #00ff9d;">0</span></label>
                 <input type="range" id="sub" min="0" max="30" step="1" value="0">
             </div>
 
             <div class="toggle-container">
                 <input type="checkbox" id="showTR" checked>
-                <label for="showTR" style="margin: 0; color: var(--theme-blue); cursor: pointer;">⚡ OVERLAY TOTAL REVENUE AREA</label>
+                <label for="showTR" style="margin: 0; cursor: pointer;">OVERLAY TOTAL REVENUE (TR)</label>
             </div>
 
             <div class="results">
-                <h3 style="font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--theme-blue);">📊 DATA ANALYTICS MATRIX</h3>
+                <h3 style="font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; color: #ffffff;">Analytics Matrix</h3>
                 <p>Market Price (P*): <span id="res-p">-</span></p>
                 <p>Equilibrium Qty (Q*): <span id="res-q">-</span></p>
-                <p style="color: var(--theme-blue);">Total Revenue (TR): <span id="res-tr" style="color: var(--theme-blue);">-</span></p>
-                <p>Net of Tax Revenue: <span id="res-net-tr">-</span></p>
+                <p>Total Revenue (TR): <span id="res-tr" style="color: var(--neon-cyan);">-</span></p>
+                <p>Net Revenue (Sellers): <span id="res-net-tr">-</span></p>
                 
                 <hr>
-                <p style="color: var(--theme-purple);">Consumer Tax Burden: <span id="res-cb" style="color: var(--theme-purple);">0</span></p>
-                <p style="color: var(--theme-purple);">Producer Tax Burden: <span id="res-pb" style="color: var(--theme-purple);">0</span></p>
-                <p style="color: var(--theme-purple);">Total Tax Revenue: <span id="res-total-tax" style="color: var(--theme-purple);">0</span></p>
+                <p>Consumer Burden: <span id="res-cb" style="color: var(--neon-magenta);">0</span></p>
+                <p>Producer Burden: <span id="res-pb" style="color: var(--neon-cyan);">0</span></p>
+                <p>Total Tax Revenue: <span id="res-total-tax" style="color: var(--neon-purple);">0</span></p>
                 
                 <hr>
-                <p style="color: var(--theme-green);">Consumer Subsidy Share: <span id="res-cs-sub" style="color: var(--theme-green);">0</span></p>
-                <p style="color: var(--theme-green);">Producer Subsidy Share: <span id="res-ps-sub" style="color: var(--theme-green);">0</span></p>
-                <p style="color: var(--theme-green);">Total Subsidy Exp.: <span id="res-total-sub" style="color: var(--theme-green);">0</span></p>
+                <p>Consumer Subsidy Share: <span id="res-cs-sub" style="color: #00ff9d;">0</span></p>
+                <p>Producer Subsidy Share: <span id="res-ps-sub" style="color: #ffc400;">0</span></p>
+                <p>Total Gov Expenditure: <span id="res-total-sub" style="color: #ffffff;">0</span></p>
                 
                 <hr>
                 <div class="area-legend">
-                    <div class="legend-item"><div class="box" style="background: rgba(255, 56, 96, 0.45);"></div> Consumer Burden</div>
-                    <div class="legend-item"><div class="box" style="background: rgba(0, 240, 255, 0.45);"></div> Producer Burden</div>
-                    <div class="legend-item"><div class="box" style="background: rgba(0, 255, 102, 0.45);"></div> Consumer Sub.</div>
-                    <div class="legend-item"><div class="box" style="background: rgba(255, 221, 87, 0.45);"></div> Producer Sub.</div>
-                    <div class="legend-item"><div class="box" style="background: rgba(0, 240, 255, 0.08); border: 1px dashed var(--theme-blue);"></div> TR Grid</div>
+                    <div class="legend-item"><div class="box" style="background: var(--neon-magenta);"></div> Consumer Component (Pink Shading)</div>
+                    <div class="legend-item"><div class="box" style="background: var(--neon-cyan);"></div> Producer Component (Cyan Shading)</div>
+                    <div class="legend-item"><div class="box" style="background: var(--area-tr); border: 1px dashed var(--neon-purple);"></div> Total Revenue Area Boundary</div>
                 </div>
             </div>
         </div>
@@ -280,38 +296,38 @@
 
                 ctx.save();
 
-                // 1. Draw TOTAL REVENUE Grid
+                // 1. Draw TOTAL REVENUE Base (Velvet Plasma tint)
                 if (econData.showTR && econData.newQ > 0) {
-                    ctx.fillStyle = 'rgba(0, 240, 255, 0.06)';
+                    ctx.fillStyle = 'rgba(157, 0, 255, 0.03)';
                     ctx.fillRect(xZero, yP_buyer, xQ - xZero, yZero - yP_buyer);
                     
-                    ctx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
-                    ctx.lineWidth = 1.5;
-                    ctx.setLineDash([3, 3]);
+                    ctx.strokeStyle = 'rgba(157, 0, 255, 0.25)';
+                    ctx.lineWidth = 1.2;
+                    ctx.setLineDash([4, 4]);
                     ctx.strokeRect(xZero, yP_buyer, xQ - xZero, yZero - yP_buyer);
                 }
 
-                // 2. Draw TAX / SUBSIDY Boxes Layer
+                // 2. High-End Overlays (Tax & Subsidy)
                 if (econData.tax > 0 && econData.newQ > 0) {
-                    ctx.fillStyle = 'rgba(255, 56, 96, 0.45)'; // Cyberpunk Crimson
+                    ctx.fillStyle = 'rgba(255, 42, 133, 0.22)'; // Elegant Pink Shading
                     ctx.fillRect(xZero, Math.min(yP_base, yP_buyer), xQ - xZero, Math.abs(yP_buyer - yP_base));
 
-                    ctx.fillStyle = 'rgba(0, 240, 255, 0.45)'; // Cyberpunk Cyan
+                    ctx.fillStyle = 'rgba(0, 240, 255, 0.18)'; // Elegant Cyan Shading
                     ctx.fillRect(xZero, Math.min(yP_base, yP_seller), xQ - xZero, Math.abs(yP_base - yP_seller));
                 }
                 
                 if (econData.sub > 0 && econData.newQ > 0) {
-                    ctx.fillStyle = 'rgba(0, 255, 102, 0.45)'; // Cyberpunk Neon Green
+                    ctx.fillStyle = 'rgba(0, 255, 157, 0.18)'; // Elegant Neon Mint
                     ctx.fillRect(xZero, Math.min(yP_base, yP_buyer), xQ - xZero, Math.abs(yP_base - yP_buyer));
 
-                    ctx.fillStyle = 'rgba(255, 221, 87, 0.45)'; // Cyberpunk Electric Gold
+                    ctx.fillStyle = 'rgba(255, 196, 0, 0.18)'; // Elegant Neon Amber
                     ctx.fillRect(xZero, Math.min(yP_seller, yP_base), xQ - xZero, Math.abs(yP_seller - yP_base));
                 }
 
-                // 3. Draw Axis Tags & Drop Lines
+                // 3. Drop Lines & Axis Tags
                 if (econData.newQ > 0) {
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                    ctx.lineWidth = 1.2;
                     ctx.setLineDash([4, 4]);
 
                     ctx.beginPath(); ctx.moveTo(xQ, yP_buyer); ctx.lineTo(xZero, yP_buyer); ctx.stroke();
@@ -319,10 +335,10 @@
 
                     ctx.font = 'bold 12px monospace';
                     ctx.fillStyle = '#ffffff';
-                    ctx.shadowBlur = 6; ctx.shadowColor = '#00f0ff';
+                    ctx.shadowBlur = 8; ctx.shadowColor = 'var(--neon-cyan)';
                     
-                    ctx.fillText('P*', xZero + 8, yP_buyer - 6);
-                    ctx.fillText('Q*', xQ + 6, yZero - 8);
+                    ctx.fillText('P*', xZero + 10, yP_buyer - 6);
+                    ctx.fillText('Q*', xQ + 6, yZero - 10);
                     ctx.shadowBlur = 0;
                 }
 
@@ -330,17 +346,17 @@
             }
         };
 
-        // Initialize Dark Theme Chart
+        // Initialize Deep Dark Theme Chart
         const ctx = document.getElementById('marketChart').getContext('2d');
         let marketChart = new Chart(ctx, {
             type: 'line',
             plugins: [econVisualPlugin],
             data: {
                 datasets: [
-                    { label: 'Demand (D)', data: [], borderColor: '#00f0ff', borderWidth: 3, fill: false, pointRadius: 0 },
-                    { label: 'Supply (S)', data: [], borderColor: '#ff3860', borderWidth: 3, fill: false, pointRadius: 0 },
-                    { label: 'New Supply (S\')', data: [], borderColor: '#bd00ff', borderWidth: 2, borderDash: [5, 5], fill: false, pointRadius: 0 },
-                    { label: 'Equilibrium Point', data: [], backgroundColor: '#ffffff', pointRadius: 6, type: 'scatter' }
+                    { label: 'Demand (D)', data: [], borderColor: '#00f0ff', borderWidth: 2.5, fill: false, pointRadius: 0 },
+                    { label: 'Supply (S)', data: [], borderColor: '#ff2a85', borderWidth: 2.5, fill: false, pointRadius: 0 },
+                    { label: 'New Supply (S\')', data: [], borderColor: '#9d00ff', borderWidth: 1.8, borderDash: [5, 4], fill: false, pointRadius: 0 },
+                    { label: 'Equilibrium Point', data: [], backgroundColor: '#ffffff', pointRadius: 5, type: 'scatter' }
                 ]
             },
             options: {
@@ -350,21 +366,27 @@
                 scales: {
                     x: { 
                         type: 'linear', 
-                        title: { display: true, text: 'Quantity (Q)', color: '#8a99ad' }, 
+                        title: { display: true, text: 'Quantity (Q)', color: '#6b7c96', font: { size: 12, weight: 'bold' } }, 
                         min: 0, max: 100,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#8a99ad' }
+                        grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                        ticks: { color: '#4e5d73', font: { family: 'monospace' } }
                     },
                     y: { 
                         type: 'linear', 
-                        title: { display: true, text: 'Price (P)', color: '#8a99ad' }, 
+                        title: { display: true, text: 'Price (P)', color: '#6b7c96', font: { size: 12, weight: 'bold' } }, 
                         min: 0, max: 100,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#8a99ad' }
+                        grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                        ticks: { color: '#4e5d73', font: { family: 'monospace' } }
                     }
                 },
                 plugins: {
-                    legend: { labels: { color: '#f5f7fa' } }
+                    legend: { 
+                        labels: { 
+                            color: '#a4b3c6',
+                            font: { size: 11, weight: '600' },
+                            boxWidth: 15
+                        } 
+                    }
                 }
             }
         });
@@ -439,35 +461,22 @@
             document.getElementById('res-ps-sub').innerText = '$' + psSub.toFixed(0);
             document.getElementById('res-total-sub').innerText = '$' + totalSub.toFixed(0);
 
-            // --- CRITICAL FIX: PREVENT OVERLAPPING FOLD/BEND ON BOUNDARIES ---
             let dData = [], sData = [], sNewData = [];
             
-            // Demand Unfolded Line Plotter
             if (ed === 0) {
                 dData = [{ x: 50, y: 0 }, { x: 50, y: 100 }];
             } else {
                 const b = 1 / ed; const a = P_base + b * Q_base;
-                // Extended bounds to let the line naturally Clip instead of fold
-                dData = [
-                    { x: 0, y: a },
-                    { x: 100, y: a - b * 100 }
-                ];
+                dData = [{ x: 0, y: a }, { x: 100, y: a - b * 100 }];
             }
 
-            // Supply Unfolded Line Plotter
             if (es === 0) {
                 sData = [{ x: 50, y: 0 }, { x: 50, y: 100 }];
                 sNewData = [{ x: 50, y: 0 }, { x: 50, y: 100 }];
             } else {
                 const d = 1 / es; const c = P_base - d * Q_base;
-                sData = [
-                    { x: 0, y: c },
-                    { x: 100, y: c + d * 100 }
-                ];
-                sNewData = [
-                    { x: 0, y: c + shift },
-                    { x: 100, y: c + shift + d * 100 }
-                ];
+                sData = [{ x: 0, y: c }, { x: 100, y: c + d * 100 }];
+                sNewData = [{ x: 0, y: c + shift }, { x: 100, y: c + shift + d * 100 }];
             }
 
             marketChart.data.datasets[0].data = dData;
