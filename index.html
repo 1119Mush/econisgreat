@@ -395,8 +395,8 @@
             if (this === taxSlider && tax > 0) { subSlider.value = 0; sub = 0; }
             if (this === subSlider && sub > 0) { taxSlider.value = 0; tax = 0; }
 
-            document.getElementById('ed-val').innerText = ed === 0 ? "0 (Inelastic)" : ed.toFixed(1);
-            document.getElementById('es-val').innerText = es === 0 ? "0 (Inelastic)" : es.toFixed(1);
+            document.getElementById('ed-val').innerText = ed === 0 ? "0 (Perfectly Inelastic)" : ed.toFixed(1);
+            document.getElementById('es-val').innerText = es === 0 ? "0 (Perfectly Inelastic)" : es.toFixed(1);
             document.getElementById('tax-val').innerText = tax;
             document.getElementById('sub-val').innerText = sub;
 
