@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSE ECON Market Simulator (Aesthetic Edition)</title>
+    <title> ECON Market Simulator (Let's Revision!) </title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Pinterest-Inspired Aesthetic Dark Palette */
-            --bg-color: #0d0f14;
-            --panel-bg: rgba(18, 22, 32, 0.7);
-            --border-color: rgba(255, 255, 255, 0.05);
+            /* Pinterest-Inspired Clean Light Palette */
+            --bg-color: #f7f9fa;
+            --panel-bg: #ffffff;
+            --inner-box-bg: #f1f3f5;
+            --border-color: #e2e8f0;
             
-            /* Clean Typography Tones */
-            --text-main: #e2e8f0;
+            /* Typography Tones */
+            --text-main: #2d3748;
             --text-muted: #718096;
             
-            /* Morandi Neon Lines */
-            --color-demand: #4fd1c5;       /* Soft Mist Cyan */
-            --color-supply: #f687b3;       /* Dusty Rose/Magenta */
-            --color-new-supply: #b794f4;   /* Muted Lavender */
+            /* Aesthetic Morandi Colors */
+            --color-demand: #319795;       /* Sage Teal */
+            --color-supply: #db7093;       /* Dusty Fig Pink */
+            --color-new-supply: #805ad5;   /* Soft Lavender */
             
-            /* High-End Soft Shading (Pinterest Palette) */
-            --area-tax-consumer: rgba(251, 211, 141, 0.16); /* Creamy Oat */
-            --area-tax-producer: rgba(183, 148, 244, 0.18); /* Smoky Amethyst */
-            --area-sub-consumer: rgba(129, 230, 217, 0.16); /* Sage Green Tint */
-            --area-sub-producer: rgba(246, 173, 85, 0.16);  /* Muted Ginger Amber */
-            --area-tr: rgba(255, 255, 255, 0.02);           /* Micro-opacity Ghost White */
+            /* Elegant Shading Overlays */
+            --area-tax-consumer: rgba(237, 137, 54, 0.1);  /* Muted Apricot/Oat */
+            --area-tax-producer: rgba(128, 90, 213, 0.1);  /* Lavender Gray */
+            --area-sub-consumer: rgba(49, 151, 149, 0.08); /* Transparent Sage */
+            --area-sub-producer: rgba(221, 107, 32, 0.08); /* Soft Terracotta */
         }
 
         body {
@@ -42,10 +42,9 @@
             text-align: center;
             font-weight: 700;
             font-size: 22px;
-            letter-spacing: 2px;
-            color: #ffffff;
+            letter-spacing: 1px;
+            color: var(--text-main);
             margin-bottom: 45px;
-            opacity: 0.95;
         }
 
         .container {
@@ -57,22 +56,20 @@
             margin: 0 auto;
         }
 
-        /* Clean Glassmorphism Panels */
+        /* Clean White Aesthetic Panels */
         .control-panel, .chart-panel {
             background: var(--panel-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 30px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
         }
 
         .control-panel {
             width: 380px;
             display: flex;
             flex-direction: column;
-            gap: 26px;
+            gap: 24px;
             box-sizing: border-box;
         }
 
@@ -86,12 +83,12 @@
 
         h3 {
             margin-top: 0;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             letter-spacing: 1px;
             color: var(--text-muted);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
             text-transform: uppercase;
         }
 
@@ -102,58 +99,58 @@
         label {
             display: block;
             font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 10px;
-            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
         }
 
-        /* Minimalist Sleek Range Sliders */
+        /* Minimalist Light Sliders */
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
-            background: rgba(255, 255, 255, 0.03);
-            height: 3px;
+            background: #e2e8f0;
+            height: 4px;
             border-radius: 2px;
             outline: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #ffffff;
+            border: 2px solid #cbd5e0;
             cursor: pointer;
-            transition: transform 0.15s ease, background-color 0.15s ease;
+            transition: transform 0.15s ease, border-color 0.15s ease;
         }
 
-        #ed::-webkit-slider-thumb { background: var(--color-demand); }
-        #es::-webkit-slider-thumb { background: var(--color-supply); }
-        #tax::-webkit-slider-thumb { background: var(--color-new-supply); }
-        #sub::-webkit-slider-thumb { background: #cbd5e0; }
+        #ed::-webkit-slider-thumb { border-color: var(--color-demand); background: var(--color-demand); }
+        #es::-webkit-slider-thumb { border-color: var(--color-supply); background: var(--color-supply); }
+        #tax::-webkit-slider-thumb { border-color: var(--color-new-supply); background: var(--color-new-supply); }
+        #sub::-webkit-slider-thumb { border-color: #a0aec0; background: #a0aec0; }
 
         input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.4);
+            transform: scale(1.3);
         }
 
         .value-display {
             float: right;
-            font-weight: 600;
+            font-weight: 700;
             font-family: monospace;
             font-size: 12px;
         }
 
-        /* Clean Structured Info Matrix */
+        /* Beautiful Mineral Gray Analytics Box */
         .results {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.02);
+            background: var(--inner-box-bg);
+            border: 1px solid #e2e8f0;
             padding: 22px;
-            border-radius: 10px;
-            font-family: -apple-system, sans-serif;
+            border-radius: 12px;
         }
 
         .results p {
-            margin: 14px 0;
+            margin: 12px 0;
             font-size: 13px;
             display: flex;
             justify-content: space-between;
@@ -162,14 +159,14 @@
 
         .results span {
             color: var(--text-main);
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .toggle-container {
             padding: 14px;
-            background: rgba(255, 255, 255, 0.01);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
+            background: var(--inner-box-bg);
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -177,12 +174,11 @@
             font-weight: 600;
             color: var(--text-main);
             cursor: pointer;
-            transition: background 0.2s, border 0.2s;
+            transition: background 0.15s;
         }
 
         .toggle-container:hover {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.06);
+            background: #edf2f7;
         }
 
         .toggle-container input {
@@ -192,15 +188,15 @@
 
         hr {
             border: 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            margin: 16px 0;
+            border-top: 1px solid #e2e8f0;
+            margin: 14px 0;
         }
 
         .area-legend {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 16px;
+            gap: 8px;
+            margin-top: 14px;
             font-size: 11px;
         }
         .legend-item { display: flex; align-items: center; gap: 10px; color: var(--text-muted); }
@@ -209,11 +205,11 @@
 </head>
 <body>
 
-    <h1>📊 MARKET SIMULATION INTERACTIVE</h1>
+    <h1>📊 INTERACTIVE ECONOMICS MODEL</h1>
     
     <div class="container">
         <div class="control-panel">
-            <h3>System Controls</h3>
+            <h3>Parameters</h3>
             
             <div class="control-group">
                 <label>Elasticity of Demand (Ed) <span class="value-display" id="ed-val" style="color: var(--color-demand);">1.0</span></label>
@@ -231,37 +227,37 @@
             </div>
 
             <div class="control-group">
-                <label>Per-unit Subsidy <span class="value-display" id="sub-val" style="color: #a0aec0;">0</span></label>
+                <label>Per-unit Subsidy <span class="value-display" id="sub-val" style="color: #4a5568;">0</span></label>
                 <input type="range" id="sub" min="0" max="30" step="1" value="0">
             </div>
 
             <div class="toggle-container">
                 <input type="checkbox" id="showTR" checked>
-                <label for="showTR" style="margin: 0; cursor: pointer;">OVERLAY TOTAL REVENUE (TR)</label>
+                <label for="showTR" style="margin: 0; cursor: pointer;">Show Total Revenue (TR)</label>
             </div>
 
             <div class="results">
-                <h3 style="font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); margin-bottom: 12px; color: #ffffff; text-transform: none; font-weight: 500;">Data Matrix</h3>
+                <h3 style="font-size: 11px; border-bottom: 1px solid #cbd5e0; margin-bottom: 10px; color: var(--text-main); text-transform: none; font-weight: 600;">Market Matrix</h3>
                 <p>Market Price (P*): <span id="res-p">-</span></p>
                 <p>Equilibrium Qty (Q*): <span id="res-q">-</span></p>
-                <p>Total Revenue (TR): <span id="res-tr" style="color: var(--color-demand); font-weight: 600;">-</span></p>
+                <p>Total Revenue (TR): <span id="res-tr" style="color: var(--color-demand);">-</span></p>
                 <p>Net Revenue (Sellers): <span id="res-net-tr">-</span></p>
                 
                 <hr>
-                <p>Consumer Burden: <span id="res-cb" style="color: #fbd38d;">0</span></p>
-                <p>Producer Burden: <span id="res-pb" style="color: #b794f4;">0</span></p>
+                <p>Consumer Burden: <span id="res-cb" style="color: #dd6b20;">0</span></p>
+                <p>Producer Burden: <span id="res-pb" style="color: var(--color-new-supply);">0</span></p>
                 <p>Total Tax Revenue: <span id="res-total-tax">-</span></p>
                 
                 <hr>
-                <p>Consumer Subsidy Share: <span id="res-cs-sub" style="color: #81e6d9;">0</span></p>
-                <p>Producer Subsidy Share: <span id="res-ps-sub" style="color: #f6ad55;">0</span></p>
+                <p>Consumer Subsidy Share: <span id="res-cs-sub" style="color: var(--color-demand);">0</span></p>
+                <p>Producer Subsidy Share: <span id="res-ps-sub" style="color: #dd6b20;">0</span></p>
                 <p>Total Gov Expenditure: <span id="res-total-sub">0</span></p>
                 
                 <hr>
                 <div class="area-legend">
-                    <div class="legend-item"><div class="box" style="background: #fbd38d;"></div> Consumer Component</div>
-                    <div class="legend-item"><div class="box" style="background: #b794f4;"></div> Producer Component</div>
-                    <div class="legend-item"><div class="box" style="background: transparent; border: 1px dashed rgba(255,255,255,0.2);"></div> Total Revenue Grid Area</div>
+                    <div class="legend-item"><div class="box" style="background: #dd6b20;"></div> Consumer Component</div>
+                    <div class="legend-item"><div class="box" style="background: var(--color-new-supply);"></div> Producer Component</div>
+                    <div class="legend-item"><div class="box" style="background: transparent; border: 1px dashed #cbd5e0;"></div> Total Revenue Area</div>
                 </div>
             </div>
         </div>
@@ -296,37 +292,37 @@
 
                 ctx.save();
 
-                // 1. Draw TOTAL REVENUE Base (Ghost White minimal tint)
+                // 1. Draw TOTAL REVENUE Base (Linen clean light tint)
                 if (econData.showTR && econData.newQ > 0) {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.015)';
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.01)';
                     ctx.fillRect(xZero, yP_buyer, xQ - xZero, yZero - yP_buyer);
                     
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
                     ctx.lineWidth = 1.0;
                     ctx.setLineDash([4, 4]);
                     ctx.strokeRect(xZero, yP_buyer, xQ - xZero, yZero - yP_buyer);
                 }
 
-                // 2. Pinterest Morandi Area Overlays
+                // 2. Beautiful Soft Shading Overlays
                 if (econData.tax > 0 && econData.newQ > 0) {
-                    ctx.fillStyle = 'rgba(251, 211, 141, 0.15)'; // Creamy Oat
+                    ctx.fillStyle = 'rgba(221, 107, 32, 0.08)'; // Muted Apricot
                     ctx.fillRect(xZero, Math.min(yP_base, yP_buyer), xQ - xZero, Math.abs(yP_buyer - yP_base));
 
-                    ctx.fillStyle = 'rgba(183, 148, 244, 0.14)'; // Smoky Amethyst
+                    ctx.fillStyle = 'rgba(128, 90, 213, 0.08)'; // Lavender Gray
                     ctx.fillRect(xZero, Math.min(yP_base, yP_seller), xQ - xZero, Math.abs(yP_base - yP_seller));
                 }
                 
                 if (econData.sub > 0 && econData.newQ > 0) {
-                    ctx.fillStyle = 'rgba(129, 230, 217, 0.14)'; // Sage Green
+                    ctx.fillStyle = 'rgba(49, 151, 149, 0.08)'; // Clear Sage
                     ctx.fillRect(xZero, Math.min(yP_base, yP_buyer), xQ - xZero, Math.abs(yP_base - yP_buyer));
 
-                    ctx.fillStyle = 'rgba(246, 173, 85, 0.14)'; // Muted Ginger
+                    ctx.fillStyle = 'rgba(221, 107, 32, 0.08)'; // Terracotta
                     ctx.fillRect(xZero, Math.min(yP_seller, yP_base), xQ - xZero, Math.abs(yP_seller - yP_base));
                 }
 
-                // 3. Elegant Drop Lines & Axis Tags
+                // 3. Drop Lines & Axis Tags
                 if (econData.newQ > 0) {
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
                     ctx.lineWidth = 1.0;
                     ctx.setLineDash([4, 4]);
 
@@ -334,9 +330,9 @@
                     ctx.beginPath(); ctx.moveTo(xQ, yP_buyer); ctx.lineTo(xQ, yZero); ctx.stroke();
 
                     ctx.font = '500 11px -apple-system, sans-serif';
-                    ctx.fillStyle = '#a0aec0';
+                    ctx.fillStyle = '#718096';
                     
-                    ctx.fillText('P*', xZero + 10, yP_buyer - 6);
+                    ctx.fillText('P*', xZero + 8, yP_buyer - 6);
                     ctx.fillText('Q*', xQ + 6, yZero - 10);
                 }
 
@@ -344,17 +340,17 @@
             }
         };
 
-        // Initialize Deep Clean Aesthetic Chart
+        // Initialize Clean Light Theme Chart
         const ctx = document.getElementById('marketChart').getContext('2d');
         let marketChart = new Chart(ctx, {
             type: 'line',
             plugins: [econVisualPlugin],
             data: {
                 datasets: [
-                    { label: 'Demand (D)', data: [], borderColor: '#4fd1c5', borderWidth: 2, fill: false, pointRadius: 0 },
-                    { label: 'Supply (S)', data: [], borderColor: '#f687b3', borderWidth: 2, fill: false, pointRadius: 0 },
-                    { label: 'New Supply (S\')', data: [], borderColor: '#b794f4', borderWidth: 1.5, borderDash: [4, 4], fill: false, pointRadius: 0 },
-                    { label: 'Equilibrium', data: [], backgroundColor: '#ffffff', pointRadius: 4, type: 'scatter' }
+                    { label: 'Demand (D)', data: [], borderColor: '#319795', borderWidth: 2.2, fill: false, pointRadius: 0 },
+                    { label: 'Supply (S)', data: [], borderColor: '#db7093', borderWidth: 2.2, fill: false, pointRadius: 0 },
+                    { label: 'New Supply (S\')', data: [], borderColor: '#805ad5', borderWidth: 1.5, borderDash: [4, 4], fill: false, pointRadius: 0 },
+                    { label: 'Equilibrium', data: [], backgroundColor: '#2d3748', pointRadius: 4, type: 'scatter' }
                 ]
             },
             options: {
@@ -364,24 +360,24 @@
                 scales: {
                     x: { 
                         type: 'linear', 
-                        title: { display: true, text: 'Quantity (Q)', color: '#4a5568', font: { size: 11, weight: '500' } }, 
+                        title: { display: true, text: 'Quantity (Q)', color: '#718096', font: { size: 11, weight: '600' } }, 
                         min: 0, max: 100,
-                        grid: { color: 'rgba(255, 255, 255, 0.02)' },
-                        ticks: { color: '#4a5568', font: { size: 10 } }
+                        grid: { color: '#edf2f7' },
+                        ticks: { color: '#a0aec0', font: { size: 10 } }
                     },
                     y: { 
                         type: 'linear', 
-                        title: { display: true, text: 'Price (P)', color: '#4a5568', font: { size: 11, weight: '500' } }, 
+                        title: { display: true, text: 'Price (P)', color: '#718096', font: { size: 11, weight: '600' } }, 
                         min: 0, max: 100,
-                        grid: { color: 'rgba(255, 255, 255, 0.02)' },
-                        ticks: { color: '#4a5568', font: { size: 10 } }
+                        grid: { color: '#edf2f7' },
+                        ticks: { color: '#a0aec0', font: { size: 10 } }
                     }
                 },
                 plugins: {
                     legend: { 
                         labels: { 
-                            color: '#718096',
-                            font: { size: 11, weight: '500' },
+                            color: '#4a5568',
+                            font: { size: 11, weight: '600' },
                             boxWidth: 12
                         } 
                     }
