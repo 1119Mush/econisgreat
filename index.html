@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSE ECON Market Simulator (Focused Edition)</title>
+    <title>DSE ECON Quantum Market Simulator (Dynamic Edition)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
@@ -18,6 +18,8 @@
             --color-demand: #0d9488;       /* Sage Teal */
             --color-supply: #db2777;       /* Dusty Fig Pink */
             --color-policy: #7c3aed;       /* Lavender Purple */
+            --color-alert: #ef4444;        /* Crimson Red */
+            --color-success: #10b981;      /* Mint Green */
         }
 
         body {
@@ -42,7 +44,7 @@
             flex-wrap: wrap;
             gap: 25px;
             justify-content: center;
-            max-width: 1250px;
+            max-width: 1285px;
             margin: 0 auto;
         }
 
@@ -55,7 +57,7 @@
         }
 
         .control-panel {
-            width: 380px;
+            width: 400px;
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -65,7 +67,7 @@
         .chart-panel {
             flex: 1;
             min-width: 450px;
-            max-width: 720px;
+            max-width: 750px;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -74,7 +76,7 @@
         .chart-container-wrapper {
             flex: 1;
             position: relative;
-            height: 520px;
+            height: 540px;
             background: #ffffff;
         }
 
@@ -108,7 +110,6 @@
             gap: 10px;
         }
 
-        /* Minimalist Inputs */
         input[type="number"], select {
             width: 100%;
             padding: 8px;
@@ -200,24 +201,49 @@
         .radio-label input { cursor: pointer; accent-color: var(--text-main); }
 
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 10px 0; }
+        
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
+        .badge-alert { background: rgba(239, 110, 110, 0.15); color: var(--color-alert); }
     </style>
 </head>
 <body>
 
-    <h1>📊 INTERACTIVE ECONOMICS SIMULATOR</h1>
+    <h1>📊 DSE ECON QUANTUM MODEL SIMULATOR</h1>
     
     <div class="container">
         <div class="control-panel">
             
             <div class="section">
-                <h3>📈 Market Curves / 供求彈性</h3>
-                <div style="margin-bottom: 15px; margin-top: 10px;">
-                    <label>Elasticity of Demand (Ed) <span class="value-display" id="ed-val" style="color: var(--color-demand);">1.0</span></label>
-                    <input type="range" id="ed" min="0.2" max="2.5" step="0.1" value="1.0">
+                <h3>📐 Initial Market Parameters / 初始市場基點</h3>
+                <div class="grid-2" style="margin-top: 5px;">
+                    <div>
+                        <label>Base Price (P*)</label>
+                        <input type="number" id="baseP" value="50" min="1">
+                    </div>
+                    <div>
+                        <label>Base Quantity (Q*)</label>
+                        <input type="number" id="baseQ" value="50" min="1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📈 Elasticity Sliders / 供求彈性</h3>
+                <p style="font-size:11px; color:var(--text-muted); margin:0 0 10px 0;">Min = Perfectly Inelastic | Max = Perfectly Elastic</p>
+                <div style="margin-bottom: 15px;">
+                    <label>Demand Elasticity (Ed) <span class="value-display" id="ed-val" style="color: var(--color-demand);">1.0</span></label>
+                    <input type="range" id="ed" min="0" max="4.0" step="0.1" value="1.0">
                 </div>
                 <div>
-                    <label>Elasticity of Supply (Es) <span class="value-display" id="es-val" style="color: var(--color-supply);">1.0</span></label>
-                    <input type="range" id="es" min="0.2" max="2.5" step="0.1" value="1.0">
+                    <label>Supply Elasticity (Es) <span class="value-display" id="es-val" style="color: var(--color-supply);">1.0</span></label>
+                    <input type="range" id="es" min="0" max="4.0" step="0.1" value="1.0">
                 </div>
             </div>
 
@@ -230,24 +256,24 @@
                     </label>
                     <label class="radio-label">
                         <input type="radio" name="marketMode" id="modeManual" value="manual">
-                        Manual Input (手動指定)
+                        Manual Input (手動指定狀態)
                     </label>
                 </div>
                 
                 <div id="manualInputContainer" style="display: none; margin-top: 10px;" class="grid-2">
                     <div>
-                        <label>Set Price (P)</label>
-                        <input type="number" id="manualP" value="50" min="5" max="95">
+                        <label>Market Price (P)</label>
+                        <input type="number" id="manualP" value="50">
                     </div>
                     <div>
-                        <label>Set Quantity (Q)</label>
-                        <input type="number" id="manualQ" value="50" min="5" max="95">
+                        <label>Market Quantity (Q)</label>
+                        <input type="number" id="manualQ" value="50">
                     </div>
                 </div>
             </div>
 
-            <div class="section">
-                <h3>⚠️ Intervention Policies / 政府干預</h3>
+            <div id="policySection" class="section">
+                <h3>⚠️ Policy Intervention / 政府干預</h3>
                 <label>Policy Type / 政策類型</label>
                 <select id="policyType">
                     <option value="none">None / 無政策</option>
@@ -257,19 +283,19 @@
                     <option value="sub">Per-unit Subsidy / 從量補貼</option>
                 </select>
                 
-                <div id="policySliderContainer" style="margin-top: 12px; display: none;">
-                    <label id="policyLabel">Value: <span id="policyVal">0</span></label>
-                    <input type="range" id="policyValue" min="0" max="30" step="1" value="0">
+                <div id="policyInputContainer" style="margin-top: 12px; display: none;">
+                    <label id="policyInputLabel">Policy Level Value / 干預數值</label>
+                    <input type="number" id="policyDirectValue" value="0">
                 </div>
             </div>
 
             <div class="results">
-                <h3>📊 Data Matrix / 數據矩陣</h3>
+                <h3>📊 Diagnostic Analytics Matrix</h3>
                 <p>Simulated Price (P): <span id="res-p">-</span></p>
                 <p>Simulated Quantity (Q): <span id="res-q">-</span></p>
                 <hr>
-                <p>Original Eq Price (P*): <span id="res-peq">-</span></p>
-                <p>Original Eq Qty (Q*): <span id="res-qeq">-</span></p>
+                <p>Policy Effectiveness: <span id="res-effect">-</span></p>
+                <p>Market Condition: <span id="res-condition">-</span></p>
             </div>
         </div>
 
@@ -282,7 +308,9 @@
     </div>
 
     <script>
-        // --- 1. DOM Elements & State ---
+        // --- 1. State Hooks & DOM Linking ---
+        const basePInput = document.getElementById('baseP');
+        const baseQInput = document.getElementById('baseQ');
         const edSlider = document.getElementById('ed');
         const esSlider = document.getElementById('es');
         const modeAuto = document.getElementById('modeAuto');
@@ -291,14 +319,13 @@
         const manualPInput = document.getElementById('manualP');
         const manualQInput = document.getElementById('manualQ');
         const policyType = document.getElementById('policyType');
-        const policyValue = document.getElementById('policyValue');
-        const policySliderContainer = document.getElementById('policySliderContainer');
-        const policyLabel = document.getElementById('policyLabel');
-        const policyVal = document.getElementById('policyVal');
+        const policyInputContainer = document.getElementById('policyInputContainer');
+        const policyInputLabel = document.getElementById('policyInputLabel');
+        const policyDirectValue = document.getElementById('policyDirectValue');
 
         let marketState = {};
 
-        // --- 2. Economics Core Plugin (Drawing Crosshairs & Annotations) ---
+        // --- 2. Chart Layout Interceptor Plugin ---
         const econVisualPlugin = {
             id: 'econVisualPlugin',
             beforeDatasetsDraw(chart) {
@@ -310,7 +337,7 @@
                 const xQ = x.getPixelForValue(marketState.Q_disp);
                 const yP = y.getPixelForValue(marketState.P_disp);
 
-                // Draw Clean Crosshair Drop Lines
+                // Axis crosshairs lines tracking
                 ctx.strokeStyle = 'rgba(71, 85, 105, 0.4)';
                 ctx.lineWidth = 1.2;
                 ctx.setLineDash([4, 4]);
@@ -318,7 +345,6 @@
                 ctx.beginPath(); ctx.moveTo(xQ, yP); ctx.lineTo(xZero, yP); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(xQ, yP); ctx.lineTo(xQ, yZero); ctx.stroke();
 
-                // Text Labels on Axis
                 ctx.font = '600 11px -apple-system, sans-serif';
                 ctx.fillStyle = '#475569';
                 ctx.setLineDash([]);
@@ -329,7 +355,7 @@
             }
         };
 
-        // --- 3. Chart Setup ---
+        // --- 3. Instantiating Chart.js Base Wrapper ---
         const ctx = document.getElementById('marketChart').getContext('2d');
         let marketChart = new Chart(ctx, {
             type: 'line',
@@ -338,11 +364,11 @@
                 datasets: [
                     { label: 'Demand (D)', data: [], borderColor: '#0d9488', borderWidth: 2.5, fill: false, pointRadius: 0 },
                     { label: 'Supply (S)', data: [], borderColor: '#db2777', borderWidth: 2.5, fill: false, pointRadius: 0 },
-                    { label: 'Policy / Control Guide', data: [], borderColor: '#7c3aed', borderWidth: 1.5, borderDash: [4, 4], fill: false, pointRadius: 0 }
+                    { label: 'Policy / Boundary Target Line', data: [], borderColor: '#7c3aed', borderWidth: 1.5, borderDash: [4, 4], fill: false, pointRadius: 0 }
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, animation: { duration: 120 },
+                responsive: true, maintainAspectRatio: false, animation: { duration: 100 },
                 scales: {
                     x: { type: 'linear', min: 0, max: 100, title: { display: true, text: 'Quantity (Q)' }, grid: { color: '#f1f5f9' } },
                     y: { type: 'linear', min: 0, max: 100, title: { display: true, text: 'Price (P)' }, grid: { color: '#f1f5f9' } }
@@ -350,147 +376,223 @@
             }
         });
 
-        // --- 4. Logic Engine ---
+        // --- 4. Mathematical Rendering Engine ---
         function updateMarket() {
-            let ed = parseFloat(edSlider.value);
-            let es = parseFloat(esSlider.value);
+            let P_base = parseFloat(basePInput.value) || 50;
+            let Q_base = parseFloat(baseQInput.value) || 50;
             
-            document.getElementById('ed-val').innerText = ed.toFixed(1);
-            document.getElementById('es-val').innerText = es.toFixed(1);
+            let edVal = parseFloat(edSlider.value);
+            let esVal = parseFloat(esSlider.value);
 
-            // Establish standard underlying mathematical linear curves based on elasticities
-            const P_base = 50, Q_base = 50;
-            const b = 1 / ed; // Demand slope multiplier
-            const d = 1 / es; // Supply slope multiplier
-            
-            // a and c coefficients for Q = a - bP style frameworks mapped to graph
-            const a = Q_base + (P_base * ed); 
-            const c = Q_base - (P_base * es);
-
-            // True economic equilibrium
-            let P_eq = 50;
-            let Q_eq = 50;
-
-            let P_disp = P_eq;
-            let Q_disp = Q_eq;
+            // Display adjustments for slider tags text 
+            document.getElementById('ed-val').innerText = edVal === 0 ? "0 (Perfectly Inelastic)" : edVal === 4.0 ? "Inf (Perfectly Elastic)" : edVal.toFixed(1);
+            document.getElementById('es-val').innerText = esVal === 0 ? "0 (Perfectly Inelastic)" : esVal === 4.0 ? "Inf (Perfectly Elastic)" : esVal.toFixed(1);
 
             let policy = policyType.value;
-            let pVal = parseFloat(policyValue.value);
+            let pVal = parseFloat(policyDirectValue.value) || 0;
 
-            // Check mode
+            let P_disp = P_base;
+            let Q_disp = Q_base;
+            let effectText = '<span class="badge badge-success">Effective</span>';
+            let conditionText = "Equilibrium";
+
+            // Establish slope values cleanly without broken segments
+            // Standard linear equation form: P = Intercept - (Slope * Q)
+            // Elasticity definition safely approximated at equilibrium anchor point
+            let slopeD = (edVal === 4.0) ? 0 : (edVal === 0 ? 999999 : (P_base / (Q_base * edVal)));
+            let slopeS = (esVal === 4.0) ? 0 : (esVal === 0 ? 999999 : (P_base / (Q_base * esVal)));
+
+            let d_intercept_P = P_base + (slopeD * Q_base);
+            let s_intercept_P = P_base - (slopeS * Q_base);
+
+            // Engine calculation states
             if (modeAuto.checked) {
-                // Auto mode respects policy shifts directly
                 if (policy === 'none') {
-                    P_disp = P_eq; Q_disp = Q_eq;
-                } else if (policy === 'ceil') {
-                    P_disp = pVal < P_eq ? pVal : P_eq;
-                    Q_disp = pVal < P_eq ? (Q_base + (pVal - P_base) * es) : Q_eq; // limited by supply
-                } else if (policy === 'floor') {
-                    P_disp = pVal > P_eq ? pVal : P_eq;
-                    Q_disp = pVal > P_eq ? (Q_base - (pVal - P_base) * ed) : Q_eq; // limited by demand
-                } else if (policy === 'tax') {
-                    P_disp = (a - c + d * pVal) / (b + d); // Buyer Price
-                    Q_disp = a - b * P_disp;
-                } else if (policy === 'sub') {
-                    P_disp = (a - c - d * pVal) / (b + d); // Buyer Price
-                    Q_disp = a - b * P_disp;
+                    P_disp = P_base; Q_disp = Q_base;
+                    effectText = "—";
+                } 
+                else if (policy === 'ceil') {
+                    if (pVal < P_base && slopeS !== 999999) {
+                        P_disp = pVal;
+                        Q_disp = (esVal === 4.0) ? Q_base : Math.max(0, (pVal - s_intercept_P) / slopeS);
+                        conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Shortage (供不應求)</span>";
+                    } else {
+                        P_disp = P_base; Q_disp = Q_base;
+                        effectText = '<span class="badge badge-alert">Ineeffective</span>';
+                        conditionText = "Equilibrium";
+                    }
+                } 
+                else if (policy === 'floor') {
+                    if (pVal > P_base && slopeD !== 999999) {
+                        P_disp = pVal;
+                        Q_disp = (edVal === 4.0) ? Q_base : Math.max(0, (d_intercept_P - pVal) / slopeD);
+                        conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Surplus (供過於求)</span>";
+                    } else {
+                        P_disp = P_base; Q_disp = Q_base;
+                        effectText = '<span class="badge badge-alert">Ineffective</span>';
+                        conditionText = "Equilibrium";
+                    }
+                } 
+                else if (policy === 'tax') {
+                    // S shifts vertically upwards by Tax value amount
+                    if (edVal === 4.0) { // Perfectly Elastic Demand
+                        P_disp = P_base; Q_disp = Math.max(0, Q_base - (pVal / slopeS));
+                    } else if (edVal === 0) { // Perfectly Inelastic Demand
+                        P_disp = P_base + pVal; Q_disp = Q_base;
+                    } else if (esVal === 0) { // Perfectly Inelastic Supply
+                        P_disp = P_base; Q_disp = Q_base;
+                    } else {
+                        P_disp = (d_intercept_P * slopeS + (s_intercept_P + pVal) * slopeD) / (slopeS + slopeD);
+                        Q_disp = (d_intercept_P - P_disp) / slopeD;
+                    }
+                    effectText = '<span class="badge badge-success">Effective</span>';
+                } 
+                else if (policy === 'sub') {
+                    // S shifts vertically downwards by Subsidy value amount
+                    if (edVal === 4.0) {
+                        P_disp = P_base; Q_disp = Q_base + (pVal / slopeS);
+                    } else if (edVal === 0) {
+                        P_disp = Math.max(0, P_base - pVal); Q_disp = Q_base;
+                    } else if (esVal === 0) {
+                        P_disp = P_base; Q_disp = Q_base;
+                    } else {
+                        P_disp = (d_intercept_P * slopeS + (s_intercept_P - pVal) * slopeD) / (slopeS + slopeD);
+                        Q_disp = (d_intercept_P - P_disp) / slopeD;
+                    }
+                    effectText = '<span class="badge badge-success">Effective</span>';
                 }
             } else {
-                // Manual input override mode
+                // Manual User State override inputs override calculations
                 P_disp = parseFloat(manualPInput.value) || P_base;
                 Q_disp = parseFloat(manualQInput.value) || Q_base;
+                effectText = "User Mode";
+                
+                // Real-time market evaluation calculation for user positioning
+                let Qd_at_P = (edVal === 4.0) ? Q_base : (edVal === 0 ? Q_base : Math.max(0, (d_intercept_P - P_disp) / slopeD));
+                let Qs_at_P = (esVal === 4.0) ? Q_base : (esVal === 0 ? Q_base : Math.max(0, (P_disp - s_intercept_P) / slopeS));
+                
+                if(Math.abs(Qd_at_P - Qs_at_P) < 0.1 || (edVal===0 && esVal===0)) {
+                    conditionText = "Equilibrium";
+                } else if (Qd_at_P > Qs_at_P) {
+                    conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Shortage (供不應求)</span>";
+                } else {
+                    conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Surplus (供過於求)</span>";
+                }
             }
 
-            // Save state globally for visual plugin render reference
-            marketState = { P_disp, Q_disp, P_eq, Q_eq };
+            marketState = { P_disp, Q_disp, P_base, Q_base };
 
-            // Update DOM output boxes
+            // Render text matrix outputs 
             document.getElementById('res-p').innerText = '$' + P_disp.toFixed(1);
             document.getElementById('res-q').innerText = Q_disp.toFixed(1);
-            document.getElementById('res-peq').innerText = '$' + P_eq.toFixed(1);
-            document.getElementById('res-qeq').innerText = Q_eq.toFixed(1);
+            document.getElementById('res-effect').innerHTML = effectText;
+            document.getElementById('res-condition').innerHTML = conditionText;
 
-            // Rebuild coordinate arrays for drawing lines
+            // --- Dynamic Adaptive Axis Tuning ---
+            // Intelligently find maximum bounds dynamically to frame intersection nicely
+            let axisMax = Math.max(P_base * 2, Q_base * 2, P_disp * 1.5, Q_disp * 1.5, pVal * 1.2, 80);
+            marketChart.options.scales.x.max = axisMax;
+            marketChart.options.scales.y.max = axisMax;
+
+            // --- Vector Line Coordination Array Tracing ---
             let dPoints = [], sPoints = [], pPoints = [];
-            for (let p = 0; p <= 100; p += 5) {
-                // Demand curve: Q = a - ed * P style mapping
-                dPoints.push({ x: Math.max(0, Q_base - (p - P_base) * ed), y: p });
-                // Supply curve: Q = Q_base + (P - P_base) * es
-                sPoints.push({ x: Math.max(0, Q_base + (p - P_base) * es), y: p });
+
+            // Curve 1: Clean Demand Trace Line
+            if (edVal === 0) { // Vertical Inelastic
+                dPoints = [{ x: Q_base, y: 0 }, { x: Q_base, y: axisMax }];
+            } else if (edVal === 4.0) { // Horizontal Elastic
+                dPoints = [{ x: 0, y: P_base }, { x: axisMax, y: P_base }];
+            } else {
+                dPoints = [{ x: 0, y: d_intercept_P }, { x: Math.max(0, d_intercept_P / slopeD), y: 0 }];
             }
 
-            // Secondary policy line setups
+            // Curve 2: Clean Supply Trace Line
+            if (esVal === 0) { // Vertical Inelastic
+                sPoints = [{ x: Q_base, y: 0 }, { x: Q_base, y: axisMax }];
+            } else if (esVal === 4.0) { // Horizontal Elastic
+                sPoints = [{ x: 0, y: P_base }, { x: axisMax, y: P_base }];
+            } else {
+                sPoints = [{ x: 0, y: s_intercept_P }, { x: axisMax, y: s_intercept_P + (slopeS * axisMax) }];
+            }
+
+            // Curve 3: Interactive Policy Guide Overlay Vectors
             if (modeAuto.checked) {
                 if (policy === 'ceil' || policy === 'floor') {
-                    pPoints = [{ x: 0, y: pVal }, { x: 100, y: pVal }];
-                    marketChart.data.datasets[2].label = policy === 'ceil' ? 'Price Ceiling' : 'Price Floor';
-                } else if (policy === 'tax') {
-                    for(let p=0; p<=100; p+=5) pPoints.push({ x: Math.max(0, Q_base + (p - pVal - P_base) * es), y: p });
-                    marketChart.data.datasets[2].label = 'S + Tax';
-                } else if (policy === 'sub') {
-                    for(let p=0; p<=100; p+=5) pPoints.push({ x: Math.max(0, Q_base + (p + pVal - P_base) * es), y: p });
-                    marketChart.data.datasets[2].label = 'S - Subsidy';
-                } else {
-                    pPoints = [];
+                    pPoints = [{ x: 0, y: pVal }, { x: axisMax, y: pVal }];
+                    marketChart.data.datasets[2].label = policy === 'ceil' ? 'Price Ceiling Line' : 'Price Floor Line';
+                } else if (policy === 'tax' && esVal !== 0) {
+                    if (esVal === 4.0) {
+                        pPoints = [{ x: 0, y: P_base + pVal }, { x: axisMax, y: P_base + pVal }];
+                    } else {
+                        pPoints = [{ x: 0, y: s_intercept_P + pVal }, { x: axisMax, y: s_intercept_P + pVal + (slopeS * axisMax) }];
+                    }
+                    marketChart.data.datasets[2].label = "S + Tax Shift";
+                } else if (policy === 'sub' && esVal !== 0) {
+                    if (esVal === 4.0) {
+                        pPoints = [{ x: 0, y: Math.max(0, P_base - pVal) }, { x: axisMax, y: Math.max(0, P_base - pVal) }];
+                    } else {
+                        pPoints = [{ x: 0, y: s_intercept_P - pVal }, { x: axisMax, y: s_intercept_P - pVal + (slopeS * axisMax) }];
+                    }
+                    marketChart.data.datasets[2].label = "S - Subsidy Shift";
                 }
             } else {
-                // Manual marker lines crosshair explicitly
+                // Crosshairs highlight guidance mapping for user manual mode
                 pPoints = [{ x: Q_disp, y: 0 }, { x: Q_disp, y: P_disp }, { x: 0, y: P_disp }];
-                marketChart.data.datasets[2].label = 'User Custom Target';
+                marketChart.data.datasets[2].label = 'User Config State Target';
             }
 
             marketChart.data.datasets[0].data = dPoints;
-            marketChart.data.datasets[1].data = sData = dPoints; 
             marketChart.data.datasets[1].data = sPoints;
             marketChart.data.datasets[2].data = pPoints;
 
             marketChart.update();
         }
 
-        // --- 5. Interface Control Routing ---
-        function toggleInputMode() {
+        // --- 5. Event Binding Routing ---
+        function handleModeToggle() {
             if (modeManual.checked) {
                 manualInputContainer.style.display = 'grid';
                 policyType.value = 'none';
-                policySliderContainer.style.display = 'none';
+                policyInputContainer.style.display = 'none';
             } else {
                 manualInputContainer.style.display = 'none';
             }
             updateMarket();
         }
 
-        modeAuto.addEventListener('change', toggleInputMode);
-        modeManual.addEventListener('change', toggleInputMode);
-        [manualPInput, manualQInput].forEach(el => el.addEventListener('input', updateMarket));
+        modeAuto.addEventListener('change', handleModeToggle);
+        modeManual.addEventListener('change', handleModeToggle);
+        [manualPInput, manualQInput, basePInput, baseQInput, policyDirectValue].forEach(el => el.addEventListener('input', updateMarket));
 
         policyType.addEventListener('change', function() {
-            if (this.value === 'none') { policySliderContainer.style.display = 'none'; } 
-            else {
-                modeAuto.checked = true; manualInputContainer.style.display = 'none'; // force auto mode
-                policySliderContainer.style.display = 'block';
-                if(this.value === 'ceil') { policyLabel.childNodes[0].nodeValue = "Ceiling Price: "; policyValue.value = 35; }
-                if(this.value === 'floor') { policyLabel.childNodes[0].nodeValue = "Floor Price: "; policyValue.value = 65; }
-                if(this.value === 'tax') { policyLabel.childNodes[0].nodeValue = "Tax per unit: "; policyValue.value = 15; }
-                if(this.value === 'sub') { policyLabel.childNodes[0].nodeValue = "Subsidy per unit: "; policyValue.value = 15; }
-                policyVal.innerText = policyValue.value;
+            if (this.value === 'none') {
+                policyInputContainer.style.display = 'none';
+            } else {
+                modeAuto.checked = true; manualInputContainer.style.display = 'none'; // force toggle back to calculations
+                policyInputContainer.style.display = 'block';
+                let currentP = parseFloat(basePInput.value) || 50;
+                
+                if (this.value === 'ceil') { policyInputLabel.innerText = "Ceiling Price Level ($):"; policyDirectValue.value = currentP - 15; }
+                if (this.value === 'floor') { policyInputLabel.innerText = "Floor Price Level ($):"; policyDirectValue.value = currentP + 15; }
+                if (this.value === 'tax') { policyInputLabel.innerText = "Per-Unit Tax Surcharge ($):"; policyDirectValue.value = 15; }
+                if (this.value === 'sub') { policyInputLabel.innerText = "Per-Unit Subsidy Grant ($):"; policyDirectValue.value = 15; }
             }
             updateMarket();
         });
 
-        policyValue.addEventListener('input', function() { policyVal.innerText = this.value; updateMarket(); });
         [edSlider, esSlider].forEach(el => el.addEventListener('input', updateMarket));
 
-        // High-res Canvas Downloader Plugin
+        // High resolution raster image downloader routine
         document.getElementById('downloadBtn').addEventListener('click', () => {
             html2canvas(document.getElementById('downloadArea'), { scale: 3 }).then(canvas => {
                 let link = document.createElement('a');
-                link.download = 'clean-market-model.png';
+                link.download = 'dynamic-dse-market-model.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             });
         });
 
-        // Init
+        // Initialize execution on runtime ready
         updateMarket();
     </script>
 </body>
