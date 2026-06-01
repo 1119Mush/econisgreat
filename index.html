@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSE ECON Quantum Market Simulator - Version 3.5</title>
+    <title>DSE ECON Quantum Market Simulator - Version 5.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
@@ -282,12 +282,12 @@
                 
                 <div id="manualInputContainer" style="display: none; margin-top: 10px;" class="grid-2">
                     <div>
-                        <label>Market Price (P) ✍️</label>
+                        <label>Set Market Price (P) ✍️</label>
                         <input type="number" id="manualP" value="50">
                     </div>
-                    <div>
-                        <label>Market Quantity (Q) ✍️</label>
-                        <input type="number" id="manualQ" value="50">
+                    <div style="opacity: 0.6; pointer-events: none;">
+                        <label>Resulting Market Q</label>
+                        <input type="number" id="manualQ" value="50" readonly>
                     </div>
                 </div>
             </div>
@@ -310,15 +310,15 @@
 
                 <label class="checkbox-container">
                     <input type="checkbox" id="showTRArea" checked>
-                    Show TR Boundary / 顯示總收益邊界
+                    Show TR Boundary / 顯示總收益邊界 (P × Q_e)
                 </label>
             </div>
 
             <div class="results">
                 <h3>📊 Diagnostic Analytics Matrix</h3>
-                <p>Simulated Price (P): <span id="res-p">-</span></p>
-                <p>Simulated Quantity (Q): <span id="res-q">-</span></p>
-                <p>Total Revenue (TR): <span id="res-tr" style="font-weight:700;">-</span></p>
+                <p>Market Price (P): <span id="res-p">-</span></p>
+                <p>Actual Transacted Q_e (短邊): <span id="res-q" style="color:var(--color-success); font-weight:bold;">-</span></p>
+                <p>Total Revenue (TR = P × Q_e): <span id="res-tr" style="font-weight:700;">-</span></p>
                 <hr>
                 <p>Operating Mode: <span id="res-mode">-</span></p>
                 <p>Market Condition: <span id="res-condition">-</span></p>
@@ -358,9 +358,8 @@
             const showTRAreaCheck = document.getElementById('showTRArea');
 
             let marketState = {};
-            let isUpdatingLinkage = false;
 
-            // ADVANCED ECON RENDER ENGINE V3.5 - WITH GEOMETRIC CLIPPING DEFENSE
+            // ECON RENDERING ENGINE V5.0 - SHORT-SIDE PRINCIPLE ENFORCED
             const econVisualPlugin = {
                 id: 'econVisualPlugin',
                 beforeDatasetsDraw(chart) {
@@ -370,66 +369,60 @@
                     const xZero = x.getPixelForValue(0);
                     const yZero = y.getPixelForValue(0);
                     
-                    // Geometric Safety Constraint: Prevent coordinates from exploding past the canvas bounds
                     const safeX = (val) => Math.max(xZero, Math.min(x.getPixelForValue(val), x.getPixelForValue(x.max)));
                     const safeY = (val) => Math.max(y.getPixelForValue(y.max), Math.min(y.getPixelForValue(val), yZero));
 
+                    // Use Q_disp (which is min(Qd, Qs)) to anchor crosshair guidelines
                     const xQ = safeX(marketState.Q_disp);
                     const yP = safeY(marketState.P_disp);
                     const yP_base = safeY(marketState.P_base);
                     const yP_buyer = safeY(marketState.P_buyer);
                     const yP_seller = safeY(marketState.P_seller);
 
-                    // 1. Total Revenue Shadow Area
+                    // 1. Total Revenue Shading Box based strictly on Transacted Q_e
                     if (marketState.showTR && marketState.Q_disp > 0) {
-                        ctx.fillStyle = 'rgba(15, 23, 42, 0.018)';
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.025)';
                         ctx.fillRect(xZero, yP, xQ - xZero, yZero - yP);
-                        ctx.strokeStyle = 'rgba(100, 116, 139, 0.22)';
+                        ctx.strokeStyle = 'rgba(100, 116, 139, 0.25)';
                         ctx.lineWidth = 1.2;
                         ctx.setLineDash([4, 4]);
                         ctx.strokeRect(xZero, yP, xQ - xZero, yZero - yP);
                     }
 
-                    // 2. Incident Shading Boxes (With strict 0-clipping control for tax/subsidy)
+                    // 2. Tax/Subsidy Incidence Rectangles
                     if (marketState.Q_disp > 0) {
                         if (marketState.policy === 'tax') {
-                            // Consumer Share (Orange) -> P_buyer down to P_base
                             ctx.fillStyle = 'rgba(249, 115, 22, 0.16)';
                             ctx.fillRect(xZero, Math.min(yP_buyer, yP_base), xQ - xZero, Math.abs(yP_buyer - yP_base));
-                            // Producer Share (Purple) -> P_base down to P_seller
                             ctx.fillStyle = 'rgba(124, 58, 237, 0.14)';
                             ctx.fillRect(xZero, Math.min(yP_base, yP_seller), xQ - xZero, Math.abs(yP_base - yP_seller));
                         } 
                         else if (marketState.policy === 'sub') {
-                            // Consumer Benefit (Orange) -> P_base down to P_buyer
                             ctx.fillStyle = 'rgba(249, 115, 22, 0.16)';
                             ctx.fillRect(xZero, Math.min(yP_base, yP_buyer), xQ - xZero, Math.abs(yP_base - yP_buyer));
-                            // Producer Benefit (Purple) -> P_seller down to P_base
                             ctx.fillStyle = 'rgba(124, 58, 237, 0.14)';
                             ctx.fillRect(xZero, Math.min(yP_seller, yP_base), xQ - xZero, Math.abs(yP_seller - yP_base));
                         }
                     }
 
-                    // 3. Precision Intersect Dotted Guidelines
-                    ctx.strokeStyle = 'rgba(71, 85, 105, 0.4)';
+                    // 3. Draw Short-Side Guideline Intersection
+                    ctx.strokeStyle = 'rgba(71, 85, 105, 0.5)';
                     ctx.lineWidth = 1.2;
                     ctx.setLineDash([4, 4]);
                     
-                    // Main Crosshair
                     ctx.beginPath(); ctx.moveTo(xQ, yP); ctx.lineTo(xZero, yP); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(xQ, yP); ctx.lineTo(xQ, yZero); ctx.stroke();
 
-                    // Multi-price tracking crosshairs for tax/subsidy
                     if (marketState.policy === 'tax' || marketState.policy === 'sub') {
                         ctx.beginPath(); ctx.moveTo(xQ, yP_seller); ctx.lineTo(xZero, yP_seller); ctx.stroke();
                         ctx.beginPath(); ctx.moveTo(xQ, yP_buyer); ctx.lineTo(xZero, yP_buyer); ctx.stroke();
                     }
 
-                    // 4. Clean Dynamic Text Labeling
+                    // 4. Dynamic Node Text Labels
                     ctx.font = '600 11px -apple-system, sans-serif';
-                    ctx.fillStyle = '#475569';
+                    ctx.fillStyle = '#1e293b';
                     ctx.setLineDash([]);
-                    ctx.fillText('Q', xQ + 6, yZero - 10);
+                    ctx.fillText('Q_e', xQ + 6, yZero - 10);
                     
                     if (marketState.policy === 'tax' || marketState.policy === 'sub') {
                         ctx.fillText('P_B', xZero + 8, yP_buyer - 6);
@@ -437,6 +430,12 @@
                     } else {
                         ctx.fillText('P', xZero + 8, yP - 6);
                     }
+
+                    // Add visual short-side indicator circle dot on the chart
+                    ctx.fillStyle = 'var(--color-success)';
+                    ctx.beginPath();
+                    ctx.arc(xQ, yP, 4, 0, 2 * Math.PI);
+                    ctx.fill();
 
                     ctx.restore();
                 }
@@ -450,19 +449,25 @@
                     datasets: [
                         { label: 'Demand (D)', data: [], borderColor: '#0d9488', borderWidth: 2.5, fill: false, pointRadius: 0 },
                         { label: 'Supply (S)', data: [], borderColor: '#db2777', borderWidth: 2.5, fill: false, pointRadius: 0 },
-                        { label: 'Policy Shift Line', data: [], borderColor: '#7c3aed', borderWidth: 1.5, borderDash: [5, 4], fill: false, pointRadius: 0 }
+                        { label: 'Policy Line', data: [], borderColor: '#7c3aed', borderWidth: 1.5, borderDash: [5, 4], fill: false, pointRadius: 0 }
                     ]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false, animation: { duration: 60 },
+                    responsive: true, maintainAspectRatio: false, animation: { duration: 30 },
                     scales: {
-                        x: { type: 'linear', min: 0, title: { display: true, text: 'Quantity (Q)' }, grid: { color: '#f1f5f9' } },
-                        y: { type: 'linear', min: 0, title: { display: true, text: 'Price (P)' }, grid: { color: '#f1f5f9' } }
+                        x: { 
+                            type: 'linear', min: 0, title: { display: true, text: 'Quantity (Q)' }, grid: { color: '#f1f5f9' },
+                            ticks: { callback: function(val) { return Math.round(val); } }
+                        },
+                        y: { 
+                            type: 'linear', min: 0, title: { display: true, text: 'Price (P)' }, grid: { color: '#f1f5f9' },
+                            ticks: { callback: function(val) { return Math.round(val); } }
+                        }
                     }
                 }
             });
 
-            function updateMarket(triggeredBy) {
+            function updateMarket() {
                 let P_base = parseFloat(basePInput.value) || 50;
                 let Q_base = parseFloat(baseQInput.value) || 50;
                 let edVal = parseFloat(edSlider.value);
@@ -483,7 +488,7 @@
                 let modeText = '<span class="badge badge-success">Auto Eq</span>';
                 let conditionText = "Equilibrium";
 
-                // Absolute Slope Calculations with Float Thresholding
+                // Curve intercepts and slopes
                 let slopeD = (edVal >= 3.95) ? 0 : ((edVal <= 0.05) ? 999999 : (P_base / (Q_base * edVal)));
                 let slopeS = (esVal >= 3.95) ? 0 : ((esVal <= 0.05) ? 999999 : (P_base / (Q_base * esVal)));
                 let d_intercept_P = P_base + (slopeD * Q_base);
@@ -491,49 +496,47 @@
 
                 let consumerShare = 0, producerShare = 0, totalPolicyVol = 0;
 
-                // Mode 1: Manual Linkage Mode
-                if (modeManual.checked && !isUpdatingLinkage) {
-                    isUpdatingLinkage = true;
+                // 🏛️ CORE MODE LOGIC - SHORT-SIDE IMPLEMENTATION
+                if (modeManual.checked) {
                     modeText = '<span class="badge badge-neutral">Manual Linkage</span>';
-                    
-                    if (triggeredBy === 'price') {
-                        let inputP = parseFloat(manualPInput.value);
-                        if (isNaN(inputP)) inputP = P_base;
-                        P_disp = Math.max(0, inputP);
-                        if (edVal >= 3.95 || edVal <= 0.05) Q_disp = Q_base;
-                        else Q_disp = Math.max(0, (d_intercept_P - P_disp) / slopeD);
-                        manualQInput.value = Q_disp.toFixed(1);
-                    } 
-                    else if (triggeredBy === 'quantity') {
-                        let inputQ = parseFloat(manualQInput.value);
-                        if (isNaN(inputQ)) inputQ = Q_base;
-                        Q_disp = Math.max(0, inputQ);
-                        if (edVal >= 3.95 || edVal <= 0.05) P_disp = P_base;
-                        else P_disp = Math.max(0, d_intercept_P - (slopeD * Q_disp));
-                        manualPInput.value = P_disp.toFixed(1);
-                    }
-                    isUpdatingLinkage = false;
+                    let inputP = parseFloat(manualPInput.value);
+                    if (isNaN(inputP)) inputP = P_base;
+                    P_disp = Math.max(0, inputP);
 
+                    // Compute potential Qd and Qs at this precise manually set price
                     let Qd_at_P = (edVal >= 3.95) ? Q_base : (edVal <= 0.05 ? Q_base : Math.max(0, (d_intercept_P - P_disp) / slopeD));
                     let Qs_at_P = (esVal >= 3.95) ? Q_base : (esVal <= 0.05 ? Q_base : Math.max(0, (P_disp - s_intercept_P) / slopeS));
                     
-                    if (Math.abs(Qd_at_P - Qs_at_P) < 0.5) conditionText = "Equilibrium";
-                    else if (P_disp > P_base) conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Surplus (供過於求)</span>";
-                    else conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Shortage (供不應求)</span>";
+                    // CRITICAL ECONOMICS LAW: Qe = min(Qd, Qs)
+                    Q_disp = Math.min(Qd_at_P, Qs_at_P);
+                    manualQInput.value = Q_disp.toFixed(1);
+
+                    if (Math.abs(Qd_at_P - Qs_at_P) < 0.1) {
+                        conditionText = "Equilibrium";
+                    } else if (P_disp > P_base) {
+                        conditionText = `<span style='color:var(--color-alert); font-weight:bold;'>Surplus (Q_s > Q_d)<br>Q_e limited by Demand</span>`;
+                    } else {
+                        conditionText = `<span style='color:var(--color-alert); font-weight:bold;'>Shortage (Q_d > Q_s)<br>Q_e limited by Supply</span>`;
+                    }
                 } 
-                // Mode 2: Auto Mode
                 else if (modeAuto.checked) {
                     if (policy === 'none') { P_disp = P_base; Q_disp = Q_base; } 
                     else if (policy === 'ceil') {
-                        if (pVal < P_base && slopeS !== 999999) {
-                            P_disp = pVal; Q_disp = (esVal >= 3.95) ? Q_base : Math.max(0, (pVal - s_intercept_P) / slopeS);
-                            conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Shortage (供不應求)</span>";
+                        if (pVal < P_base) {
+                            P_disp = pVal; 
+                            let Qd_at_P = (edVal >= 3.95) ? Q_base : Math.max(0, (d_intercept_P - pVal) / slopeD);
+                            let Qs_at_P = (esVal >= 3.95) ? Q_base : Math.max(0, (pVal - s_intercept_P) / slopeS);
+                            Q_disp = Math.min(Qd_at_P, Qs_at_P); // Short side constraint
+                            conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Shortage (Price Ceiling Effective)</span>";
                         } else { P_disp = P_base; Q_disp = Q_base; }
                     } 
                     else if (policy === 'floor') {
-                        if (pVal > P_base && slopeD !== 999999) {
-                            P_disp = pVal; Q_disp = (edVal >= 3.95) ? Q_base : Math.max(0, (d_intercept_P - pVal) / slopeD);
-                            conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Surplus (供過於求)</span>";
+                        if (pVal > P_base) {
+                            P_disp = pVal; 
+                            let Qd_at_P = (edVal >= 3.95) ? Q_base : Math.max(0, (d_intercept_P - pVal) / slopeD);
+                            let Qs_at_P = (esVal >= 3.95) ? Q_base : Math.max(0, (pVal - s_intercept_P) / slopeS);
+                            Q_disp = Math.min(Qd_at_P, Qs_at_P); // Short side constraint
+                            conditionText = "<span style='color:var(--color-alert); font-weight:bold;'>Surplus (Price Floor Effective)</span>";
                         } else { P_disp = P_base; Q_disp = Q_base; }
                     } 
                     else if (policy === 'tax') {
@@ -566,12 +569,11 @@
                     }
                 }
 
-                // Strict Floor Clip for state values to stop negative UI text leaks
                 if (P_seller < 0) P_seller = 0;
 
                 marketState = { P_disp, Q_disp, P_base, Q_base, P_buyer, P_seller, policy, showTR };
 
-                // Update Data Panels
+                // Print diagnostics
                 document.getElementById('res-p').innerText = '$' + P_disp.toFixed(1);
                 document.getElementById('res-q').innerText = Q_disp.toFixed(1);
                 document.getElementById('res-tr').innerText = '$' + (P_disp * Q_disp).toFixed(0);
@@ -594,14 +596,14 @@
                     document.getElementById('res-ptb').innerText = '$' + producerShare.toFixed(0);
                 } else { burdenMetrics.style.display = 'none'; }
 
-                // Dynamic Zoom Bounds Engine
-                let axisMax = Math.max(P_base * 2.2, Q_base * 2.2, P_disp * 1.4, Q_disp * 1.4, P_buyer * 1.3, 100);
+                // Clean dynamic scale boundaries
+                let rawMax = Math.max(P_base * 2.2, Q_base * 2.2, P_disp * 1.4, Q_disp * 1.4, P_buyer * 1.3, 100);
+                let axisMax = Math.ceil(rawMax / 20) * 20; 
                 marketChart.options.scales.x.max = axisMax;
                 marketChart.options.scales.y.max = axisMax;
 
-                // Points Generators
+                // Build Chart Points
                 let dPoints = [], sPoints = [];
-
                 if (edVal <= 0.05) dPoints = [{ x: Q_base, y: 0 }, { x: Q_base, y: axisMax }];
                 else if (edVal >= 3.95) dPoints = [{ x: 0, y: P_base }, { x: axisMax, y: P_base }];
                 else dPoints = [{ x: 0, y: d_intercept_P }, { x: Math.max(0, d_intercept_P / slopeD), y: 0 }];
@@ -610,7 +612,7 @@
                 else if (esVal >= 3.95) sPoints = [{ x: 0, y: P_base }, { x: axisMax, y: P_base }];
                 else sPoints = [{ x: 0, y: Math.max(0, s_intercept_P) }, { x: axisMax, y: Math.max(0, s_intercept_P + (slopeS * axisMax)) }];
 
-                // Policy Line Alignment: Full Axis Scan Vector to prevent floating/disconnection
+                // Policy Interventions Lines
                 let pPoints = [];
                 if (modeAuto.checked) {
                     if (policy === 'ceil' || policy === 'floor') {
@@ -620,14 +622,14 @@
                         else if (esVal >= 3.95) pPoints = [{ x: 0, y: P_base + pVal }, { x: axisMax, y: P_base + pVal }];
                         else {
                             let shiftIntercept = s_intercept_P + pVal;
-                            pPoints = [{ x: 0, y: Math.max(0, shiftIntercept) }, { x: axisMax, y: Math.max(0, shiftIntercept + (slopeS * axisMax)) }];
+                            pPoints = [{ x: 0, y: shiftIntercept }, { x: axisMax, y: shiftIntercept + (slopeS * axisMax) }];
                         }
                     } else if (policy === 'sub') {
                         if (esVal <= 0.05) pPoints = [{ x: Q_base, y: 0 }, { x: Q_base, y: axisMax }];
-                        else if (esVal >= 3.95) pPoints = [{ x: 0, y: Math.max(0, P_base - pVal) }, { x: axisMax, y: Math.max(0, P_base - pVal) }];
+                        else if (esVal >= 3.95) pPoints = [{ x: 0, y: P_base - pVal }, { x: axisMax, y: P_base - pVal }];
                         else {
                             let shiftIntercept = s_intercept_P - pVal;
-                            pPoints = [{ x: 0, y: Math.max(0, shiftIntercept) }, { x: axisMax, y: Math.max(0, shiftIntercept + (slopeS * axisMax)) }];
+                            pPoints = [{ x: 0, y: shiftIntercept }, { x: axisMax, y: shiftIntercept + (slopeS * axisMax) }];
                         }
                     }
                 }
@@ -643,20 +645,17 @@
                     manualInputContainer.style.display = 'grid';
                     policyType.value = 'none';
                     policyInputContainer.style.display = 'none';
-                    updateMarket('price');
                 } else {
                     manualInputContainer.style.display = 'none';
-                    updateMarket();
                 }
+                updateMarket();
             }
 
             modeAuto.addEventListener('change', handleModeToggle);
             modeManual.addEventListener('change', handleModeToggle);
             showTRAreaCheck.addEventListener('change', updateMarket);
             
-            manualPInput.addEventListener('input', () => updateMarket('price'));
-            manualQInput.addEventListener('input', () => updateMarket('quantity'));
-            
+            manualPInput.addEventListener('input', updateMarket);
             [basePInput, baseQInput, policyDirectValue].forEach(el => el.addEventListener('input', updateMarket));
 
             policyType.addEventListener('change', function() {
@@ -678,7 +677,7 @@
             document.getElementById('downloadBtn').addEventListener('click', () => {
                 html2canvas(document.getElementById('downloadArea'), { scale: 3 }).then(canvas => {
                     let link = document.createElement('a');
-                    link.download = 'dse-market-simulator-v3.5.png';
+                    link.download = 'dse-market-simulator-v5.0.png';
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                 });
