@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSE ECON Quantum Market Simulator (Advanced Edition)</title>
+    <title>DSE ECON Market Simulator (Focused Edition)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
@@ -18,12 +18,6 @@
             --color-demand: #0d9488;       /* Sage Teal */
             --color-supply: #db2777;       /* Dusty Fig Pink */
             --color-policy: #7c3aed;       /* Lavender Purple */
-            
-            /* Pinterest-Inspired Overlay Opacities */
-            --area-cs: rgba(13, 148, 136, 0.12);
-            --area-ps: rgba(219, 39, 119, 0.1);
-            --area-tax: rgba(249, 115, 22, 0.14);
-            --area-sub: rgba(168, 85, 247, 0.12);
         }
 
         body {
@@ -48,7 +42,7 @@
             flex-wrap: wrap;
             gap: 25px;
             justify-content: center;
-            max-width: 1300px;
+            max-width: 1250px;
             margin: 0 auto;
         }
 
@@ -61,19 +55,17 @@
         }
 
         .control-panel {
-            width: 420px;
+            width: 380px;
             display: flex;
             flex-direction: column;
             gap: 20px;
             box-sizing: border-box;
-            max-height: 85vh;
-            overflow-y: auto;
         }
 
         .chart-panel {
             flex: 1;
             min-width: 450px;
-            max-width: 750px;
+            max-width: 720px;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -82,7 +74,7 @@
         .chart-container-wrapper {
             flex: 1;
             position: relative;
-            height: 550px;
+            height: 520px;
             background: #ffffff;
         }
 
@@ -102,35 +94,30 @@
             background: #ffffff;
         }
 
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
 
-        label {
-            display: block;
-            font-size: 11px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--text-main);
-        }
-
-        input[type="text"], input[type="number"], select {
+        /* Minimalist Inputs */
+        input[type="number"], select {
             width: 100%;
             padding: 8px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             background: var(--bg-color);
             color: var(--text-main);
-            font-family: monospace;
             box-sizing: border-box;
             font-size: 12px;
-        }
-
-        select {
-            font-family: inherit;
-            cursor: pointer;
         }
 
         /* Sliders */
@@ -148,8 +135,17 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: var(--color-policy);
+            background: #475569;
             cursor: pointer;
+        }
+        #ed::-webkit-slider-thumb { background: var(--color-demand); }
+        #es::-webkit-slider-thumb { background: var(--color-supply); }
+
+        .value-display {
+            float: right;
+            font-weight: 700;
+            font-family: monospace;
+            font-size: 12px;
         }
 
         .btn {
@@ -188,42 +184,70 @@
             font-family: monospace;
         }
 
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .radio-label input { cursor: pointer; accent-color: var(--text-main); }
+
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 10px 0; }
     </style>
 </head>
 <body>
 
-    <h1>📊 DSE ECON QUANTUM MARKET SIMULATOR</h1>
+    <h1>📊 INTERACTIVE ECONOMICS SIMULATOR</h1>
     
     <div class="container">
         <div class="control-panel">
+            
             <div class="section">
-                <h3>✨ Exam Scenarios / 考試場景模板</h3>
-                <select id="presetSelect" style="margin-top: 5px;">
-                    <option value="custom">-- Free Sandbox Mode / 自由沙盒模式 --</option>
-                    <option value="weather">Bad Weather Affects Supply (天氣惡劣影響供給)</option>
-                    <option value="income">Income Increase Affects Normal Good (收入增加影響正常物品需求)</option>
-                    <option value="substitute">Price of Substitutes Rises (替代品價格上升)</option>
-                </select>
+                <h3>📈 Market Curves / 供求彈性</h3>
+                <div style="margin-bottom: 15px; margin-top: 10px;">
+                    <label>Elasticity of Demand (Ed) <span class="value-display" id="ed-val" style="color: var(--color-demand);">1.0</span></label>
+                    <input type="range" id="ed" min="0.2" max="2.5" step="0.1" value="1.0">
+                </div>
+                <div>
+                    <label>Elasticity of Supply (Es) <span class="value-display" id="es-val" style="color: var(--color-supply);">1.0</span></label>
+                    <input type="range" id="es" min="0.2" max="2.5" step="0.1" value="1.0">
+                </div>
             </div>
 
             <div class="section">
-                <h3>📐 Market Equations / 供求方程式</h3>
-                <p style="font-size:11px; color:var(--text-muted); margin:2px 0 10px 0;">Format: Qd = a - bP | Qs = c + dP</p>
-                <div class="grid-2">
+                <h3>🏛️ Target Market State / 目標市場狀態</h3>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="marketMode" id="modeAuto" value="auto" checked>
+                        Auto Equilibrium (自動均衡)
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="marketMode" id="modeManual" value="manual">
+                        Manual Input (手動指定)
+                    </label>
+                </div>
+                
+                <div id="manualInputContainer" style="display: none; margin-top: 10px;" class="grid-2">
                     <div>
-                        <label>Demand / 需求 (Qd)</label>
-                        <input type="text" id="eq_d" value="100 - 1P">
+                        <label>Set Price (P)</label>
+                        <input type="number" id="manualP" value="50" min="5" max="95">
                     </div>
                     <div>
-                        <label>Supply / 供給 (Qs)</label>
-                        <input type="text" id="eq_s" value="0 + 1P">
+                        <label>Set Quantity (Q)</label>
+                        <input type="number" id="manualQ" value="50" min="5" max="95">
                     </div>
                 </div>
             </div>
 
             <div class="section">
-                <h3>🏛️ Policy Interventions / 政府政策模擬</h3>
+                <h3>⚠️ Intervention Policies / 政府干預</h3>
                 <label>Policy Type / 政策類型</label>
                 <select id="policyType">
                     <option value="none">None / 無政策</option>
@@ -235,22 +259,17 @@
                 
                 <div id="policySliderContainer" style="margin-top: 12px; display: none;">
                     <label id="policyLabel">Value: <span id="policyVal">0</span></label>
-                    <input type="range" id="policyValue" min="0" max="50" step="1" value="0">
+                    <input type="range" id="policyValue" min="0" max="30" step="1" value="0">
                 </div>
             </div>
 
             <div class="results">
-                <h3>📊 Analytics Matrix / 數據矩陣</h3>
-                <p>Equilibrium Price (P*): <span id="res-p">-</span></p>
-                <p>Equilibrium Quantity (Q*): <span id="res-q">-</span></p>
+                <h3>📊 Data Matrix / 數據矩陣</h3>
+                <p>Simulated Price (P): <span id="res-p">-</span></p>
+                <p>Simulated Quantity (Q): <span id="res-q">-</span></p>
                 <hr>
-                <p>Consumer Surplus (CS): <span id="res-cs" style="color: var(--color-demand);">-</span></p>
-                <p>Producer Surplus (PS): <span id="res-ps" style="color: var(--color-supply);">-</span></p>
-                <div id="policyResults" style="display: none;">
-                    <hr>
-                    <p id="p-label-1">Gov Revenue/Exp: <span id="res-gov">-</span></p>
-                    <p id="p-label-2">Deadweight Loss (DWL): <span id="res-dwl" style="color: #ef4444;">-</span></p>
-                </div>
+                <p>Original Eq Price (P*): <span id="res-peq">-</span></p>
+                <p>Original Eq Qty (Q*): <span id="res-qeq">-</span></p>
             </div>
         </div>
 
@@ -264,104 +283,53 @@
 
     <script>
         // --- 1. DOM Elements & State ---
-        const eqDInput = document.getElementById('eq_d');
-        const eqSInput = document.getElementById('eq_s');
+        const edSlider = document.getElementById('ed');
+        const esSlider = document.getElementById('es');
+        const modeAuto = document.getElementById('modeAuto');
+        const modeManual = document.getElementById('modeManual');
+        const manualInputContainer = document.getElementById('manualInputContainer');
+        const manualPInput = document.getElementById('manualP');
+        const manualQInput = document.getElementById('manualQ');
         const policyType = document.getElementById('policyType');
         const policyValue = document.getElementById('policyValue');
         const policySliderContainer = document.getElementById('policySliderContainer');
         const policyLabel = document.getElementById('policyLabel');
         const policyVal = document.getElementById('policyVal');
-        const presetSelect = document.getElementById('presetSelect');
 
         let marketState = {};
 
-        // --- 2. Equation Parser (Python-like Logic) ---
-        function parseEquation(str, isDemand) {
-            try {
-                let clean = str.replace(/\s+/g, '');
-                let match = clean.match(/^([+-]?\d*(?:\.\d+)?)([+-]\d*(?:\.\d+)?)[Pp]$/);
-                if (!match) return null;
-                let intercept = parseFloat(match[1]);
-                let slopeStr = match[2];
-                let slope = (slopeStr === '+' || slopeStr === '+1') ? 1 : (slopeStr === '-' || slopeStr === '-1') ? -1 : parseFloat(slopeStr);
-                return { a: intercept, b: slope };
-            } catch (e) { return null; }
-        }
-
-        // --- 3. Economics Core Plugin (Canvas Drawing) ---
+        // --- 2. Economics Core Plugin (Drawing Crosshairs & Annotations) ---
         const econVisualPlugin = {
             id: 'econVisualPlugin',
             beforeDatasetsDraw(chart) {
-                if (!marketState.valid) return;
                 const { ctx, scales: { x, y } } = chart;
                 ctx.save();
 
                 const xZero = x.getPixelForValue(0);
                 const yZero = y.getPixelForValue(0);
-                const xQ = x.getPixelForValue(marketState.Q_actual);
-                const yP_buyer = y.getPixelForValue(marketState.P_buyer);
-                const yP_seller = y.getPixelForValue(marketState.P_seller);
-                const yP_eq = y.getPixelForValue(marketState.P_eq);
-                const yD_intercept = y.getPixelForValue(marketState.d_intercept);
-                const yS_intercept = y.getPixelForValue(marketState.s_intercept);
+                const xQ = x.getPixelForValue(marketState.Q_disp);
+                const yP = y.getPixelForValue(marketState.P_disp);
 
-                // --- Draw Surplus Areas ---
-                if (marketState.policy === 'none') {
-                    // Standard CS
-                    ctx.fillStyle = 'rgba(13, 148, 136, 0.15)';
-                    ctx.beginPath(); ctx.moveTo(xZero, yP_eq); ctx.lineTo(xQ, yP_eq); ctx.lineTo(xZero, yD_intercept); ctx.fill();
-                    // Standard PS
-                    ctx.fillStyle = 'rgba(219, 39, 119, 0.12)';
-                    ctx.beginPath(); ctx.moveTo(xZero, yP_eq); ctx.lineTo(xQ, yP_eq); ctx.lineTo(xZero, yS_intercept); ctx.fill();
-                } 
-                else if (marketState.policy === 'ceil' || marketState.policy === 'floor' || marketState.policy === 'tax') {
-                    // Effective Intervention Areas
-                    ctx.fillStyle = 'rgba(13, 148, 136, 0.15)'; // CS
-                    ctx.beginPath(); ctx.moveTo(xZero, yP_buyer); ctx.lineTo(xQ, yP_buyer); ctx.lineTo(xZero, yD_intercept); ctx.fill();
-                    
-                    ctx.fillStyle = 'rgba(219, 39, 119, 0.12)'; // PS
-                    ctx.beginPath(); ctx.moveTo(xZero, yP_seller); ctx.lineTo(xQ, yP_seller); ctx.lineTo(xZero, yS_intercept); ctx.fill();
+                // Draw Clean Crosshair Drop Lines
+                ctx.strokeStyle = 'rgba(71, 85, 105, 0.4)';
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash([4, 4]);
 
-                    if (marketState.policy === 'tax') {
-                        ctx.fillStyle = 'rgba(249, 115, 22, 0.14)'; // Tax Rev
-                        ctx.fillRect(xZero, yP_buyer, xQ - xZero, yP_seller - yP_buyer);
-                    }
-                    // DWL
-                    const xQ_eq = x.getPixelForValue(marketState.Q_eq);
-                    ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
-                    ctx.beginPath(); ctx.moveTo(xQ, yP_buyer); ctx.lineTo(xQ_eq, yP_eq); ctx.lineTo(xQ, yP_seller); ctx.fill();
-                }
-                else if (marketState.policy === 'sub') {
-                    // Subsidy CS & PS expanded
-                    ctx.fillStyle = 'rgba(13, 148, 136, 0.15)';
-                    ctx.beginPath(); ctx.moveTo(xZero, yP_buyer); ctx.lineTo(xQ, yP_buyer); ctx.lineTo(xZero, yD_intercept); ctx.fill();
-                    ctx.fillStyle = 'rgba(219, 39, 119, 0.12)';
-                    ctx.beginPath(); ctx.moveTo(xZero, yP_seller); ctx.lineTo(xQ, yP_seller); ctx.lineTo(xZero, yS_intercept); ctx.fill();
-                    
-                    // Subsidy Area Cost
-                    ctx.fillStyle = 'rgba(168, 85, 247, 0.1)';
-                    ctx.fillRect(xZero, yP_seller, xQ - xZero, yP_buyer - yP_seller);
-                }
+                ctx.beginPath(); ctx.moveTo(xQ, yP); ctx.lineTo(xZero, yP); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(xQ, yP); ctx.lineTo(xQ, yZero); ctx.stroke();
 
-                // --- Drop Lines ---
-                ctx.strokeStyle = 'rgba(71, 85, 105, 0.3)'; ctx.lineWidth = 1.2; ctx.setLineDash([4, 4]);
-                ctx.beginPath(); ctx.moveTo(xQ, yP_buyer); ctx.lineTo(xZero, yP_buyer); ctx.stroke();
-                if(yP_buyer !== yP_seller) { ctx.beginPath(); ctx.moveTo(xQ, yP_seller); ctx.lineTo(xZero, yP_seller); ctx.stroke(); }
-                ctx.beginPath(); ctx.moveTo(xQ, Math.max(yP_buyer, yP_seller)); ctx.lineTo(xQ, yZero); ctx.stroke();
-
-                // Text labels
-                ctx.font = '600 11px -apple-system, sans-serif'; ctx.fillStyle = '#475569'; ctx.setLineDash([]);
-                ctx.fillText(marketState.policy !== 'none' ? 'Q_eff' : 'Q*', xQ + 6, yZero - 10);
-                ctx.fillText(marketState.policy !== 'none' ? 'P_buyer' : 'P*', xZero + 8, yP_buyer - 6);
-                if(marketState.policy !== 'none' && marketState.policy !== 'ceil' && marketState.policy !== 'floor') {
-                    ctx.fillText('P_seller', xZero + 8, yP_seller - 6);
-                }
+                // Text Labels on Axis
+                ctx.font = '600 11px -apple-system, sans-serif';
+                ctx.fillStyle = '#475569';
+                ctx.setLineDash([]);
+                ctx.fillText('P', xZero + 8, yP - 6);
+                ctx.fillText('Q', xQ + 6, yZero - 10);
 
                 ctx.restore();
             }
         };
 
-        // --- 4. Chart Initialization ---
+        // --- 3. Chart Setup ---
         const ctx = document.getElementById('marketChart').getContext('2d');
         let marketChart = new Chart(ctx, {
             type: 'line',
@@ -370,140 +338,160 @@
                 datasets: [
                     { label: 'Demand (D)', data: [], borderColor: '#0d9488', borderWidth: 2.5, fill: false, pointRadius: 0 },
                     { label: 'Supply (S)', data: [], borderColor: '#db2777', borderWidth: 2.5, fill: false, pointRadius: 0 },
-                    { label: 'Policy Effect Curve', data: [], borderColor: '#7c3aed', borderWidth: 1.8, borderDash: [4, 4], fill: false, pointRadius: 0 }
+                    { label: 'Policy / Control Guide', data: [], borderColor: '#7c3aed', borderWidth: 1.5, borderDash: [4, 4], fill: false, pointRadius: 0 }
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, animation: { duration: 150 },
+                responsive: true, maintainAspectRatio: false, animation: { duration: 120 },
                 scales: {
-                    x: { type: 'linear', min: 0, max: 120, title: { display: true, text: 'Quantity (Q)' }, grid: { color: '#f1f5f9' } },
-                    y: { type: 'linear', min: 0, max: 120, title: { display: true, text: 'Price (P)' }, grid: { color: '#f1f5f9' } }
+                    x: { type: 'linear', min: 0, max: 100, title: { display: true, text: 'Quantity (Q)' }, grid: { color: '#f1f5f9' } },
+                    y: { type: 'linear', min: 0, max: 100, title: { display: true, text: 'Price (P)' }, grid: { color: '#f1f5f9' } }
                 }
             }
         });
 
-        // --- 5. Calculation Engine ---
-        function calculateMarket() {
-            let d_eq = parseEquation(eqDInput.value, true);
-            let s_eq = parseEquation(eqSInput.value, false);
+        // --- 4. Logic Engine ---
+        function updateMarket() {
+            let ed = parseFloat(edSlider.value);
+            let es = parseFloat(esSlider.value);
+            
+            document.getElementById('ed-val').innerText = ed.toFixed(1);
+            document.getElementById('es-val').innerText = es.toFixed(1);
 
-            if (!d_eq || !s_eq || d_eq.b >= 0 || s_eq.b <= 0) {
-                marketState.valid = false; return;
-            }
+            // Establish standard underlying mathematical linear curves based on elasticities
+            const P_base = 50, Q_base = 50;
+            const b = 1 / ed; // Demand slope multiplier
+            const d = 1 / es; // Supply slope multiplier
+            
+            // a and c coefficients for Q = a - bP style frameworks mapped to graph
+            const a = Q_base + (P_base * ed); 
+            const c = Q_base - (P_base * es);
 
-            // Market parameters
-            let a = d_eq.a, b = -d_eq.b, c = s_eq.a, d = s_eq.b;
-            let P_eq = (a - c) / (b + d);
-            let Q_eq = a - b * P_eq;
+            // True economic equilibrium
+            let P_eq = 50;
+            let Q_eq = 50;
+
+            let P_disp = P_eq;
+            let Q_disp = Q_eq;
 
             let policy = policyType.value;
-            let val = parseFloat(policyValue.value);
+            let pVal = parseFloat(policyValue.value);
 
-            let P_buyer = P_eq, P_seller = P_eq, Q_actual = Q_eq;
-            let cs = 0, ps = 0, gov = 0, dwl = 0;
-
-            let d_intercept = a / b;
-            let s_intercept = -c / d;
-
-            if (policy === 'ceil') {
-                if (val < P_eq) { P_buyer = val; P_seller = val; Q_actual = c + d * val; }
-            } else if (policy === 'floor') {
-                if (val > P_eq) { P_buyer = val; P_seller = val; Q_actual = a - b * val; }
-            } else if (policy === 'tax') {
-                P_buyer = (a - c + d * val) / (b + d); P_seller = P_buyer - val; Q_actual = a - b * P_buyer;
-            } else if (policy === 'sub') {
-                P_buyer = (a - c - d * val) / (b + d); P_seller = P_buyer + val; Q_actual = a - b * P_buyer;
+            // Check mode
+            if (modeAuto.checked) {
+                // Auto mode respects policy shifts directly
+                if (policy === 'none') {
+                    P_disp = P_eq; Q_disp = Q_eq;
+                } else if (policy === 'ceil') {
+                    P_disp = pVal < P_eq ? pVal : P_eq;
+                    Q_disp = pVal < P_eq ? (Q_base + (pVal - P_base) * es) : Q_eq; // limited by supply
+                } else if (policy === 'floor') {
+                    P_disp = pVal > P_eq ? pVal : P_eq;
+                    Q_disp = pVal > P_eq ? (Q_base - (pVal - P_base) * ed) : Q_eq; // limited by demand
+                } else if (policy === 'tax') {
+                    P_disp = (a - c + d * pVal) / (b + d); // Buyer Price
+                    Q_disp = a - b * P_disp;
+                } else if (policy === 'sub') {
+                    P_disp = (a - c - d * pVal) / (b + d); // Buyer Price
+                    Q_disp = a - b * P_disp;
+                }
+            } else {
+                // Manual input override mode
+                P_disp = parseFloat(manualPInput.value) || P_base;
+                Q_disp = parseFloat(manualQInput.value) || Q_base;
             }
 
-            if(Q_actual < 0) Q_actual = 0;
+            // Save state globally for visual plugin render reference
+            marketState = { P_disp, Q_disp, P_eq, Q_eq };
 
-            // Surplus calculations (Area of Triangles/Trapezoids)
-            cs = 0.5 * (d_intercept - P_buyer) * Q_actual;
-            ps = 0.5 * (P_seller - s_intercept) * Q_actual;
-            if (policy === 'tax') { gov = val * Q_actual; dwl = 0.5 * val * (Q_eq - Q_actual); }
-            if (policy === 'sub') { gov = val * Q_actual; dwl = 0.5 * val * (Q_actual - Q_eq); }
-            if ((policy === 'ceil' && val < P_eq) || (policy === 'floor' && val > P_eq)) {
-                let Pd_at_Q = (a - Q_actual) / b; let Ps_at_Q = (Q_actual - c) / d;
-                dwl = 0.5 * (Pd_at_Q - Ps_at_Q) * (Q_eq - Q_actual);
-            }
+            // Update DOM output boxes
+            document.getElementById('res-p').innerText = '$' + P_disp.toFixed(1);
+            document.getElementById('res-q').innerText = Q_disp.toFixed(1);
+            document.getElementById('res-peq').innerText = '$' + P_eq.toFixed(1);
+            document.getElementById('res-qeq').innerText = Q_eq.toFixed(1);
 
-            marketState = { valid: true, P_eq, Q_eq, P_buyer, P_seller, Q_actual, policy, cs, ps, gov, dwl, d_intercept, s_intercept };
-
-            // Update UI
-            document.getElementById('res-p').innerText = '$' + P_buyer.toFixed(1);
-            document.getElementById('res-q').innerText = Q_actual.toFixed(1);
-            document.getElementById('res-cs').innerText = '$' + cs.toFixed(0);
-            document.getElementById('res-ps').innerText = '$' + ps.toFixed(0);
-
-            let pRes = document.getElementById('policyResults');
-            if (policy !== 'none') {
-                pRes.style.display = 'block';
-                document.getElementById('res-dwl').innerText = '$' + dwl.toFixed(0);
-                if(policy === 'tax') { document.getElementById('p-label-1').innerHTML = `Tax Revenue: <span style="color:var(--color-policy); font-weight:bold;">$${gov.toFixed(0)}</span>`; }
-                else if(policy === 'sub') { document.getElementById('p-label-1').innerHTML = `Gov Expenditure: <span style="color:#ef4444; font-weight:bold;">$${gov.toFixed(0)}</span>`; }
-                else { document.getElementById('p-label-1').innerHTML = `Market Condition: <span style="color:#ef4444; font-weight:bold;">${policy === 'ceil'?'Shortage':'Surplus'}</span>`; }
-            } else { pRes.style.display = 'none'; }
-
-            // Render Curves
+            // Rebuild coordinate arrays for drawing lines
             let dPoints = [], sPoints = [], pPoints = [];
-            for (let p = 0; p <= 120; p += 5) {
-                dPoints.push({ x: Math.max(0, a - b * p), y: p });
-                sPoints.push({ x: Math.max(0, c + d * p), y: p });
-                if (policy === 'tax') pPoints.push({ x: Math.max(0, c + d * (p - val)), y: p });
-                if (policy === 'sub') pPoints.push({ x: Math.max(0, c + d * (p + val)), y: p });
+            for (let p = 0; p <= 100; p += 5) {
+                // Demand curve: Q = a - ed * P style mapping
+                dPoints.push({ x: Math.max(0, Q_base - (p - P_base) * ed), y: p });
+                // Supply curve: Q = Q_base + (P - P_base) * es
+                sPoints.push({ x: Math.max(0, Q_base + (p - P_base) * es), y: p });
+            }
+
+            // Secondary policy line setups
+            if (modeAuto.checked) {
+                if (policy === 'ceil' || policy === 'floor') {
+                    pPoints = [{ x: 0, y: pVal }, { x: 100, y: pVal }];
+                    marketChart.data.datasets[2].label = policy === 'ceil' ? 'Price Ceiling' : 'Price Floor';
+                } else if (policy === 'tax') {
+                    for(let p=0; p<=100; p+=5) pPoints.push({ x: Math.max(0, Q_base + (p - pVal - P_base) * es), y: p });
+                    marketChart.data.datasets[2].label = 'S + Tax';
+                } else if (policy === 'sub') {
+                    for(let p=0; p<=100; p+=5) pPoints.push({ x: Math.max(0, Q_base + (p + pVal - P_base) * es), y: p });
+                    marketChart.data.datasets[2].label = 'S - Subsidy';
+                } else {
+                    pPoints = [];
+                }
+            } else {
+                // Manual marker lines crosshair explicitly
+                pPoints = [{ x: Q_disp, y: 0 }, { x: Q_disp, y: P_disp }, { x: 0, y: P_disp }];
+                marketChart.data.datasets[2].label = 'User Custom Target';
             }
 
             marketChart.data.datasets[0].data = dPoints;
+            marketChart.data.datasets[1].data = sData = dPoints; 
             marketChart.data.datasets[1].data = sPoints;
-            
-            if(policy === 'tax' || policy === 'sub') {
-                marketChart.data.datasets[2].label = policy === 'tax' ? "S + Tax" : "S - Subsidy";
-                marketChart.data.datasets[2].data = pPoints;
-            } else if (policy === 'ceil' || policy === 'floor') {
-                marketChart.data.datasets[2].label = policy === 'ceil' ? "Price Ceiling" : "Price Floor";
-                marketChart.data.datasets[2].data = [{ x: 0, y: val }, { x: 120, y: val }];
-            } else { marketChart.data.datasets[2].data = []; }
+            marketChart.data.datasets[2].data = pPoints;
 
             marketChart.update();
         }
 
-        // --- 6. Event Listeners ---
+        // --- 5. Interface Control Routing ---
+        function toggleInputMode() {
+            if (modeManual.checked) {
+                manualInputContainer.style.display = 'grid';
+                policyType.value = 'none';
+                policySliderContainer.style.display = 'none';
+            } else {
+                manualInputContainer.style.display = 'none';
+            }
+            updateMarket();
+        }
+
+        modeAuto.addEventListener('change', toggleInputMode);
+        modeManual.addEventListener('change', toggleInputMode);
+        [manualPInput, manualQInput].forEach(el => el.addEventListener('input', updateMarket));
+
         policyType.addEventListener('change', function() {
-            let p = this.value;
-            if (p === 'none') { policySliderContainer.style.display = 'none'; } 
+            if (this.value === 'none') { policySliderContainer.style.display = 'none'; } 
             else {
+                modeAuto.checked = true; manualInputContainer.style.display = 'none'; // force auto mode
                 policySliderContainer.style.display = 'block';
-                if(p === 'ceil') { policyLabel.childNodes[0].nodeValue = "Ceiling Price: "; policyValue.max = 100; policyValue.value = 40; }
-                if(p === 'floor') { policyLabel.childNodes[0].nodeValue = "Floor Price: "; policyValue.max = 100; policyValue.value = 60; }
-                if(p === 'tax') { policyLabel.childNodes[0].nodeValue = "Tax per unit: "; policyValue.max = 30; policyValue.value = 15; }
-                if(p === 'sub') { policyLabel.childNodes[0].nodeValue = "Subsidy per unit: "; policyValue.max = 30; policyValue.value = 15; }
+                if(this.value === 'ceil') { policyLabel.childNodes[0].nodeValue = "Ceiling Price: "; policyValue.value = 35; }
+                if(this.value === 'floor') { policyLabel.childNodes[0].nodeValue = "Floor Price: "; policyValue.value = 65; }
+                if(this.value === 'tax') { policyLabel.childNodes[0].nodeValue = "Tax per unit: "; policyValue.value = 15; }
+                if(this.value === 'sub') { policyLabel.childNodes[0].nodeValue = "Subsidy per unit: "; policyValue.value = 15; }
                 policyVal.innerText = policyValue.value;
             }
-            calculateMarket();
+            updateMarket();
         });
 
-        policyValue.addEventListener('input', function() { policyVal.innerText = this.value; calculateMarket(); });
-        [eqDInput, eqSInput].forEach(el => el.addEventListener('input', calculateMarket));
+        policyValue.addEventListener('input', function() { policyVal.innerText = this.value; updateMarket(); });
+        [edSlider, esSlider].forEach(el => el.addEventListener('input', updateMarket));
 
-        // Presets Logic
-        presetSelect.addEventListener('change', function() {
-            if(this.value === 'weather') { eqDInput.value = "100 - 1P"; eqSInput.value = "0 + 1P"; policyType.value = "tax"; policyType.dispatchEvent(new Event('change')); }
-            else if(this.value === 'income') { eqDInput.value = "120 - 1P"; eqSInput.value = "0 + 1P"; policyType.value = "none"; policyType.dispatchEvent(new Event('change')); }
-            else if(this.value === 'substitute') { eqDInput.value = "115 - 1P"; eqSInput.value = "0 + 1P"; policyType.value = "none"; policyType.dispatchEvent(new Event('change')); }
-            calculateMarket();
-        });
-
-        // Image Download
+        // High-res Canvas Downloader Plugin
         document.getElementById('downloadBtn').addEventListener('click', () => {
             html2canvas(document.getElementById('downloadArea'), { scale: 3 }).then(canvas => {
                 let link = document.createElement('a');
-                link.download = 'dse-econ-market-model.png';
+                link.download = 'clean-market-model.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             });
         });
 
-        calculateMarket();
+        // Init
+        updateMarket();
     </script>
 </body>
 </html>
